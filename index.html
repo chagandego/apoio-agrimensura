@@ -114,7 +114,7 @@ p { margin: 0; }
   padding-top: env(safe-area-inset-top, 0px);
   background: rgba(255, 255, 255, .0); transition: background-color .3s var(--ease), box-shadow .3s var(--ease);
 }
-.top.scrolled { background: rgba(255, 255, 255, .94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.top.scrolled { box-shadow: 0 1px 0 var(--line); background: rgba(255, 255, 255, .94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .top-in { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; min-height: 44px; }
 .brand-logo { width: auto; height: 62px; flex: none; mix-blend-mode: multiply; }
@@ -140,21 +140,6 @@ p { margin: 0; }
 .menu-btn[aria-expanded="true"] span::before { transform: translateY(6px) rotate(45deg); }
 .menu-btn[aria-expanded="true"] span::after { transform: translateY(-6px) rotate(-45deg); }
 
-/* Régua de rolagem: o quanto da página já foi "medido" */
-.ruler {
-  position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; pointer-events: none;
-  background:
-    repeating-linear-gradient(90deg, var(--line-2) 0 1px, transparent 1px 10px) 0 0 / 100% 4px no-repeat,
-    repeating-linear-gradient(90deg, var(--ink-3) 0 1px, transparent 1px 50px) 0 0 / 100% 8px no-repeat;
-  opacity: 0; transition: opacity .3s var(--ease);
-}
-.top.scrolled .ruler { opacity: 1; }
-.ruler-fill { position: absolute; inset: 0 auto auto 0; height: 3px; width: 100%; background: var(--signal); transform-origin: left; transform: scaleX(var(--sp, 0)); }
-.ruler-read {
-  position: absolute; top: 10px; left: clamp(26px, calc(var(--sp, 0) * 100%), calc(100% - 30px)); transform: translateX(-50%);
-  font-size: .72rem; font-weight: 700; background: var(--ink); color: #fff; padding: 1px 6px; border-radius: 3px; white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
 
 /* ---------- Hero ---------- */
 .hero { position: relative; min-height: max(640px, min(100svh, 900px)); display: flex; align-items: center; overflow: hidden; isolation: isolate; }
@@ -498,7 +483,6 @@ p { margin: 0; }
     </nav>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menu"><span></span></button>
   </div>
-  <div class="ruler" aria-hidden="true"><div class="ruler-fill"></div><span class="ruler-read" id="ruler-read">0 m</span></div>
 </header>
 
 <main id="conteudo">
@@ -1933,14 +1917,10 @@ p { margin: 0; }
   });
   nav.addEventListener('click', (e) => { if (e.target.closest('a')) { menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.setAttribute('aria-label', 'Abrir menu'); nav.classList.remove('open'); } });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { menuBtn.click(); menuBtn.focus(); } });
-  const rulerRead = $('ruler-read');
   let ticking = false;
   function onScroll() {
     ticking = false;
-    const max = document.documentElement.scrollHeight - innerHeight, p = max > 0 ? clamp(scrollY / max, 0, 1) : 0;
-    top.style.setProperty('--sp', p.toFixed(4));
     top.classList.toggle('scrolled', scrollY > 30);
-    rulerRead.textContent = Math.round(p * 100) + ' m';
   }
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   onScroll();
