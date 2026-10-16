@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Apoio Agrimensura e Topografia</title>
-<meta name="description" content="Desde 2001. Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião.">
+<meta name="description" content="Desde 2001. Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, laser scanner, delimitação de terrenos e usucapião.">
 <meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Apoio Agrimensura e Topografia">
-<meta property="og:description" content="Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião.">
+<meta property="og:description" content="Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, laser scanner, delimitação de terrenos e usucapião.">
 <meta property="og:locale" content="pt_BR">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -509,7 +509,7 @@ p { margin: 0; }
     <canvas id="map-ov" aria-hidden="true"></canvas>
     <div class="wrap hero-in">
       <h1 id="hero-title">Do fundo do lago ao alto do morro.</h1>
-      <p class="lede">Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião. Medimos em campo e entregamos planta, memorial e arquivos prontos para prefeitura, cartório ou projeto.</p>
+      <p class="lede">Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, laser scanner, delimitação de terrenos e usucapião. Medimos em campo e entregamos planta, memorial e arquivos prontos para prefeitura, cartório ou projeto.</p>
       <div class="actions">
         <a class="btn" href="#contato">Pedir orçamento</a>
         <a class="btn btn-ghost" href="#servicos">Ver os serviços</a>
@@ -528,8 +528,8 @@ p { margin: 0; }
 
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
-      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
+      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Laser scanner <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
+      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Laser scanner <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
     </div>
   </div>
 
@@ -579,6 +579,10 @@ p { margin: 0; }
           <button role="tab" type="button" id="t-bat" aria-controls="p-bat" aria-selected="false" tabindex="-1" data-ill="bat">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h12l-2 3H6z"/><path d="M12 2.5V19M9.5 2.5h5"/><path d="M2 12.5c2-1.2 4-1.2 6 0s4 1.2 6 0 4-1.2 8 0"/><path d="M2.5 21l5-2 4.5 1 4.5-1.5 5 1.5"/></svg>
             <span>Batimetria</span>
+          </button>
+          <button role="tab" type="button" id="t-scan" aria-controls="p-scan" aria-selected="false" tabindex="-1" data-ill="scan">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="3" width="6" height="7" rx="1.5"/><path d="M11.5 10v3M11.5 13l-4.5 8M11.5 13l4.5 8M11.5 13v8"/><path d="M15.5 6.5h5M16 3.5l4-1.5M16 9.5l4 1.5"/></svg>
+            <span>Laser scanner</span>
           </button>
           <button role="tab" type="button" id="t-del" aria-controls="p-del" aria-selected="false" tabindex="-1" data-ill="del">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5l13.5-1.5 1.5 14.5-15.5 1.5z"/><rect x="3" y="4" width="3.5" height="3.5" fill="currentColor"/><rect x="17" y="2.5" width="3.5" height="3.5" fill="currentColor"/><rect x="18.5" y="17" width="3.5" height="3.5" fill="currentColor"/><rect x="2.5" y="18" width="3.5" height="3.5" fill="currentColor"/></svg>
@@ -794,6 +798,58 @@ p { margin: 0; }
             </div>
           </div>
 
+          <!-- Laser scanner -->
+          <div class="svc-panel" role="tabpanel" id="p-scan" aria-labelledby="t-scan" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-scan" role="img" aria-label="Fachada de um prédio: o laser scanner varre a fachada coluna por coluna e forma a nuvem de pontos; os alvos refletivos na fachada servem para georreferenciar a nuvem no software">
+                <defs><pattern id="hatch3" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="#d9d9d9" stroke-width="2.4"/></pattern></defs>
+                <rect x="0" y="282" width="480" height="58" fill="url(#hatch3)"/>
+                <g class="scn-scene" fill="#f6f6f6" stroke="#bdbdbd" stroke-width="1.2">
+                  <rect x="70" y="70" width="340" height="212"/>
+                  <path d="M60 70H420" stroke-width="3"/>
+                  <g fill="#fff"><rect x="96" y="96" width="50" height="54"/><rect x="176" y="96" width="50" height="54"/><rect x="256" y="96" width="50" height="54"/><rect x="336" y="96" width="50" height="54"/><rect x="96" y="186" width="50" height="54"/><rect x="336" y="186" width="50" height="54"/><rect x="205" y="182" width="72" height="100"/></g>
+                </g>
+                <path d="M0 282H480" stroke="#000" stroke-width="1.5"/>
+                <g class="scn-pts"></g>
+                <line class="scn-beam" x1="240" y1="298" x2="240" y2="298" stroke="#e4472a" stroke-width="1.3"/>
+                <g class="scn-targets">
+                  <g class="scn-t" transform="translate(84 258)"><rect x="-8" y="-8" width="16" height="16" fill="#fff" stroke="#000" stroke-width="1.2"/><path d="M-8 -8H0V0H-8ZM0 0H8V8H0Z" fill="#000"/></g>
+                  <g class="scn-t" transform="translate(396 258)"><rect x="-8" y="-8" width="16" height="16" fill="#fff" stroke="#000" stroke-width="1.2"/><path d="M-8 -8H0V0H-8ZM0 0H8V8H0Z" fill="#000"/></g>
+                  <g class="scn-t" transform="translate(240 84)"><rect x="-8" y="-8" width="16" height="16" fill="#fff" stroke="#000" stroke-width="1.2"/><path d="M-8 -8H0V0H-8ZM0 0H8V8H0Z" fill="#000"/></g>
+                </g>
+                <g class="scn-scanner">
+                  <path d="M240 312L224 338M240 312L256 338M240 312V338" stroke="#000" stroke-width="1.8" fill="none"/>
+                  <rect x="231" y="288" width="18" height="24" rx="3" fill="#2b2d30" stroke="#000" stroke-width="1.2"/>
+                  <rect x="234" y="293" width="12" height="10" rx="2" fill="#5b5f64"/>
+                  <circle class="scn-eye" cx="240" cy="298" r="3.4" fill="#e4472a"/>
+                </g>
+                <g class="scn-lbl">
+                  <rect x="56" y="294" width="56" height="20" rx="3" fill="#fff" stroke="#000"/><text class="i-txt b" x="84" y="308" text-anchor="middle">Alvo 1</text>
+                  <rect x="254" y="74" width="56" height="20" rx="3" fill="#fff" stroke="#000"/><text class="i-txt b" x="282" y="88" text-anchor="middle">Alvo 3</text>
+                  <rect x="368" y="294" width="56" height="20" rx="3" fill="#fff" stroke="#000"/><text class="i-txt b" x="396" y="308" text-anchor="middle">Alvo 2</text>
+                </g>
+                <g class="scn-badge">
+                  <rect x="14" y="12" width="258" height="42" rx="4" fill="#000"/>
+                  <text x="26" y="30" fill="#fff" font-size="12.5" font-weight="800" font-family="Archivo, sans-serif">Nuvem de pontos georreferenciada</text>
+                  <text x="26" y="45" fill="#cfcfcf" font-size="10.5" font-family="Archivo, sans-serif">no software, a partir dos alvos refletivos</text>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Laser scanner georreferenciado</h3>
+              <p>Escaneamos construções, fachadas, estruturas e terrenos com laser scanner. O equipamento gira registrando milhões de pontos ao redor e forma uma nuvem de pontos em 3D, com a forma real de tudo o que foi escaneado.</p>
+              <p>Espalhamos pela área alvos refletivos, pequenos cartões que o scanner reconhece. No software, a nuvem é georreferenciada a partir desses alvos.</p>
+              <p class="use">Para fachadas e edificações, projetos de reforma e ampliação, conferência de obras, áreas industriais e lugares onde é difícil medir ponto a ponto.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Nuvem de pontos 3D georreferenciada</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Plantas, cortes e fachadas a partir da nuvem</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Arquivos para CAD e softwares de projeto</li>
+              </ul>
+            </div>
+          </div>
+
           <!-- Delimitação -->
           <div class="svc-panel" role="tabpanel" id="p-del" aria-labelledby="t-del" data-state="inactive" tabindex="0" hidden>
             <figure class="ill">
@@ -887,7 +943,7 @@ p { margin: 0; }
         <span class="ball" aria-hidden="true"></span>
         <ol class="pipe-list">
         <li><span class="n" aria-hidden="true">1</span><h3>Conversa e orçamento</h3><p>Você conta o que precisa e onde fica o imóvel. Com o endereço e o objetivo do trabalho, passamos o orçamento e o prazo.</p></li>
-        <li><span class="n" aria-hidden="true">2</span><h3>Planejamento</h3><p>Escolhemos o método certo para o caso: estação total, GPS RTK, drone ou bote. Reunimos matrícula, escritura e projetos que já existam.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><h3>Planejamento</h3><p>Escolhemos o método certo para o caso: estação total, GPS RTK, drone, bote ou laser scanner. Reunimos matrícula, escritura e projetos que já existam.</p></li>
         <li><span class="n" aria-hidden="true">3</span><h3>Campo</h3><p>A equipe vai ao local e mede: pontos do terreno, divisas, tampões, o voo do drone ou os pontos do fundo do lago.</p></li>
         <li><span class="n" aria-hidden="true">4</span><h3>Escritório</h3><p>Processamos os dados, calculamos coordenadas, áreas e volumes e desenhamos a planta.</p></li>
         <li><span class="n" aria-hidden="true">5</span><h3>Entrega</h3><p>Você recebe a planta, o memorial e os arquivos digitais, e explicamos o resultado.</p></li>
@@ -976,6 +1032,10 @@ p { margin: 0; }
           <div class="acc-panel" id="a3" role="region" aria-labelledby="q3" data-state="closed"><div><p>Em áreas grandes ou de acesso difícil, o aerolevantamento cobre muitos hectares em pouco tempo e gera ortofoto, modelo do terreno e curvas de nível. Em lotes pequenos, o levantamento em campo costuma ser mais indicado; em áreas com vegetação, o drone com LiDAR ajuda a chegar ao terreno. Indicamos o método no orçamento.</p></div></div>
         </div>
         <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q7" aria-expanded="false" aria-controls="a7">Quando usar o laser scanner?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a7" role="region" aria-labelledby="q7" data-state="closed"><div><p>Quando é preciso a forma completa de algo construído: fachadas, edificações, estruturas e instalações. Em vez de medir ponto a ponto, o scanner registra tudo ao redor numa nuvem de pontos 3D, que georreferenciamos no software a partir de alvos refletivos e usamos para desenhar plantas, cortes e fachadas.</p></div></div>
+        </div>
+        <div class="acc-item">
           <h3><button class="acc-trigger" type="button" id="q4" aria-expanded="false" aria-controls="a4">O que vocês fazem no processo de usucapião?<span class="pm" aria-hidden="true"></span></button></h3>
           <div class="acc-panel" id="a4" role="region" aria-labelledby="q4" data-state="closed"><div><p>A parte técnica: o levantamento do imóvel, a planta e o memorial descritivo com área, medidas e confrontantes. Os demais documentos e o andamento do processo ficam com o seu advogado ou com o cartório.</p></div></div>
         </div>
@@ -1023,6 +1083,7 @@ p { margin: 0; }
               <option>Levantamento cadastral</option>
               <option>Aerolevantamento com drone</option>
               <option>Batimetria</option>
+              <option>Laser scanner</option>
               <option>Delimitação de terreno</option>
               <option>Usucapião</option>
               <option>Ainda não sei</option>
@@ -1041,7 +1102,7 @@ p { margin: 0; }
     <div class="stamp">
       <div class="st-logo"><img src="logo-apoio.webp" width="800" height="740" alt="Logo da Apoio Agrimensura e Topografia" loading="lazy"></div>
       <div><span class="st-k">Empresa</span><b>Apoio Agrimensura e Topografia Ltda</b></div>
-      <div><span class="st-k">Serviços</span>Planialtimétrico, cadastral, aerolevantamento, batimetria, delimitação e usucapião</div>
+      <div><span class="st-k">Serviços</span>Planialtimétrico, cadastral, aerolevantamento, batimetria, laser scanner, delimitação e usucapião</div>
       <div><span class="st-k">Contato</span><span id="st-contato"><a href="#contato">Pedir orçamento</a></span></div>
       <div><span class="st-k">Folha</span>01/01</div>
       <div><span class="st-k">Data</span><span id="st-ano">2026</span></div>
@@ -1439,6 +1500,47 @@ p { margin: 0; }
       .to(path, { opacity: 0.25, duration: 0.6 }, '<')
       .to(ortho, { opacity: 1, filter: 'grayscale(0)', duration: 0.8 }, '<')
       .to(done, { opacity: 1, duration: 0.4 }, '-=0.2');
+    return tl;
+  };
+
+  ILL.scan = (svg) => {
+    const E = [240, 298], X0 = 72, X1 = 408, Y0 = 72, Y1 = 280, DX = 6.4, DY = 6;
+    const OPEN = [[96, 96, 50, 54], [176, 96, 50, 54], [256, 96, 50, 54], [336, 96, 50, 54], [96, 186, 50, 54], [336, 186, 50, 54], [205, 182, 72, 100]];
+    const inOpen = (x, y) => OPEN.some(([ox, oy, w, h]) => x > ox + 2 && x < ox + w - 2 && y > oy + 2 && y < oy + h - 2);
+    const ramp = [[45, 106, 159], [76, 150, 92], [220, 180, 50], [228, 71, 42]];
+    const colorAt = (y) => { const t = clamp((Y1 - y) / (Y1 - Y0), 0, 1) * 3, i = Math.min(2, Math.floor(t)), f = t - i, a = ramp[i], c = ramp[i + 1]; return `rgb(${a.map((v, n) => Math.round(v + (c[n] - v) * f)).join(',')})`; };
+    const g = svg.querySelector('.scn-pts'); g.innerHTML = '';
+    const cols = [];
+    let k = 0;
+    for (let x = X0; x <= X1; x += DX) {
+      const col = [];
+      for (let y = Y0; y <= Y1; y += DY, k++) {
+        const r1 = Math.abs(Math.sin(k * 12.9898) * 43758.5453) % 1, jx = (r1 - 0.5) * 2.4, jy = (Math.abs(Math.cos(k * 4.1414) * 24634.6345) % 1 - 0.5) * 2.4;
+        const open = inOpen(x, y);
+        if (open && r1 > 0.22) continue; // vidro e vão devolvem poucos pontos
+        col.push(el('circle', { cx: (x + jx).toFixed(1), cy: (y + jy).toFixed(1), r: 1.55, fill: open ? '#1f3b57' : colorAt(y), opacity: 0 }, g));
+      }
+      cols.push({ x, pts: col });
+    }
+    const beam = svg.querySelector('.scn-beam'), scene = svg.querySelector('.scn-scene'), o = { c: 0 };
+    let shown = 0;
+    const place = () => {
+      const c = Math.min(cols.length - 1, Math.floor(o.c));
+      const x = cols[c].x, y = Y0 + (Y1 - Y0) * (0.5 + 0.5 * Math.sin(o.c * 9));
+      beam.setAttribute('x2', x.toFixed(1)); beam.setAttribute('y2', y.toFixed(1));
+      for (; shown <= c && shown < cols.length; shown++) for (const pt of cols[shown].pts) pt.setAttribute('opacity', 1);
+    };
+    gsap.set(beam, { opacity: 1 }); gsap.set(scene, { opacity: 1 }); place();
+    const tl = gsap.timeline();
+    tl.from(svg.querySelector('.scn-scanner'), { y: 16, opacity: 0, duration: 0.45, ease: 'back.out(2)' })
+      .fromTo(svg.querySelector('.scn-eye'), { scale: 1, transformOrigin: 'center' }, { scale: 1.6, duration: 0.25, yoyo: true, repeat: 9 }, 0.4)
+      .to(o, { c: cols.length, duration: 4.4, ease: 'none', onUpdate: place }, 0.4)
+      .to(beam, { opacity: 0, duration: 0.3 })
+      .to(scene, { opacity: 0.35, duration: 0.5 }, '<')
+      .from(svg.querySelectorAll('.scn-t'), { scale: 0, transformOrigin: '50% 100%', duration: 0.35, stagger: 0.15, ease: 'back.out(2.5)' })
+      .fromTo(svg.querySelectorAll('.scn-t rect'), { stroke: '#e4472a', strokeWidth: 3 }, { stroke: '#000', strokeWidth: 1.2, duration: 0.6, stagger: 0.12 })
+      .from(svg.querySelectorAll('.scn-lbl rect, .scn-lbl text'), { opacity: 0, duration: 0.3 }, '<')
+      .from(svg.querySelector('.scn-badge'), { opacity: 0, y: -8, duration: 0.4 });
     return tl;
   };
 
