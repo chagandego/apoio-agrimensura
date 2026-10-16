@@ -1314,8 +1314,8 @@ p { margin: 0; }
     ro.src.textContent = label;
     ro.e.textContent = nf(E0 + xm) + ' m';
     ro.n.textContent = nf(N0 + (H * S - ym)) + ' m';
-    ro.zk.textContent = wet ? 'Profundidade' : 'Cota';
-    ro.z.textContent = (wet ? nf(WL - z, 1) : nf(z, 2)) + ' m';
+    ro.zk.textContent = wet ? 'Cota do fundo' : 'Cota';
+    ro.z.textContent = nf(z, 2) + ' m';
     return { z, wet };
   }
   function flash() { for (const k of ['e', 'n', 'z']) { ro[k].classList.remove('flash'); void ro[k].offsetWidth; ro[k].classList.add('flash'); } }
@@ -1334,7 +1334,7 @@ p { margin: 0; }
       tries++;
     } while (tries < 10 && Math.hypot(x - station.x, y - station.y) < 90);
     const xm = x * S, ym = y * S, z = Tz(xm, ym), wet = isWater(xm, ym, z);
-    shots.push({ x, y, t: now, txt: wet ? '−' + nf(WL - z, 1) : nf(z, 2), wet, read: false });
+    shots.push({ x, y, t: now, txt: nf(z, 2), wet, read: false });
     if (shots.length > 9) shots.shift();
     shotCount++;
   }
