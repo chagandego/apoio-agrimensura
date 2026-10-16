@@ -1,0 +1,1920 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apoio Agrimensura e Topografia</title>
+<meta name="description" content="Desde 2001. Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Apoio Agrimensura e Topografia">
+<meta property="og:description" content="Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião.">
+<meta property="og:locale" content="pt_BR">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
+<script>
+  // Abertura com a logo: só na primeira visita da sessão e sem "reduzir movimento"
+  (function () {
+    var root = document.documentElement, ok = function () { root.classList.remove('fonts-wait'); };
+    root.classList.add('fonts-wait');
+    if (document.fonts && document.fonts.load) {
+      Promise.all([document.fonts.load('800 1em Archivo'), document.fonts.load('400 1em Archivo')]).then(ok, ok);
+    } else ok();
+    setTimeout(ok, 1500);
+  })();
+  (function () {
+    var seen = false;
+    try { seen = sessionStorage.getItem('apoio-intro') === '1'; } catch (e) {}
+    if (!seen && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('intro-on');
+      setTimeout(function () { document.documentElement.classList.remove('intro-on'); }, 6000);
+    }
+  })();
+</script>
+<style>
+:root {
+  --paper: #ffffff;
+  --ink: #000000;
+  --ink-2: #4d4d4d;
+  --ink-3: #6b6b6b;
+  --line: #e6e6e6;
+  --line-2: #cfcfcf;
+  --wash: #f4f4f4;
+  --signal: #e4472a;
+  --signal-ink: #b3341c;
+  --water: #2d6a9f;
+  --water-wash: #e4eef6;
+  --ok: #1f7a4a;
+  --err: #c0321a;
+  --radius: 6px;
+  --wrap: 1240px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --head-h: 72px;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--head-h) + 12px); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1.0625rem; line-height: 1.6; font-variation-settings: 'wdth' 100;
+  overflow-x: hidden;
+}
+img, svg, canvas { display: block; max-width: 100%; }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; border-radius: 2px; }
+.wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 800; line-height: 1.02; letter-spacing: -0.015em; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 7.2vw, 6.2rem); font-stretch: 125%; font-variation-settings: 'wdth' 125; letter-spacing: -0.03em; line-height: .94; }
+h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); font-variation-settings: 'wdth' 118; }
+h3 { font-size: 1.5rem; font-variation-settings: 'wdth' 110; line-height: 1.12; }
+h4 { font-size: 1rem; font-variation-settings: 'wdth' 100; font-weight: 700; letter-spacing: 0; }
+p { margin: 0; }
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .55em;
+  min-height: 48px; padding: 0 22px; border-radius: var(--radius); border: 2px solid var(--ink);
+  background: var(--ink); color: #fff; text-decoration: none; font-weight: 700; font-variation-settings: 'wdth' 108;
+  cursor: pointer; transition: background-color .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+}
+.btn:hover { background: var(--signal); border-color: var(--signal); color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+.btn-ghost { background: transparent; color: var(--ink); }
+.btn-ghost:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-sm { min-height: 42px; padding: 0 16px; font-size: .95rem; }
+
+/* ---------- Abertura ---------- */
+.fonts-wait .hero-in, .fonts-wait .readout { visibility: hidden; }
+.intro { display: none; }
+.intro-on .intro {
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 100; background: var(--paper);
+  clip-path: inset(0 0 0 0); cursor: pointer;
+}
+.intro-on body { overflow: hidden; }
+.intro-logo { position: relative; width: min(72vw, 400px); aspect-ratio: 800 / 740; }
+.intro-img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.intro-img { clip-path: circle(0% at 49.4% 44.2%); }
+
+/* ---------- Topo ---------- */
+.skip { position: absolute; left: 12px; top: -60px; z-index: 60; background: var(--ink); color: #fff; padding: 10px 14px; border-radius: var(--radius); text-decoration: none; }
+.skip:focus { top: 12px; }
+.top {
+  position: fixed; inset: 0 0 auto 0; z-index: 50; height: var(--head-h);
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(255, 255, 255, .0); transition: background-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.top.scrolled { background: rgba(255, 255, 255, .94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.top-in { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; min-height: 44px; }
+.brand-logo { width: auto; height: 62px; flex: none; mix-blend-mode: multiply; }
+.brand-name { display: grid; line-height: 1.05; }
+.brand-name b { font-size: 1.25rem; font-weight: 850; font-variation-settings: 'wdth' 120; letter-spacing: -.01em; }
+.brand-name span { font-size: .8rem; color: var(--ink-2); font-variation-settings: 'wdth' 92; }
+.nav { display: flex; align-items: center; gap: 4px; }
+.nav a { white-space: nowrap; }
+.nav a:not(.btn) {
+  position: relative; text-decoration: none; padding: 10px 12px; font-weight: 600; font-size: .97rem; border-radius: var(--radius);
+}
+.nav a:not(.btn)::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 2px; background: var(--signal);
+  transform: scaleX(0); transform-origin: left; transition: transform .3s var(--ease);
+}
+.nav a:not(.btn):hover::after, .nav a.on::after { transform: scaleX(1); }
+.nav .btn { margin-left: 10px; }
+.menu-btn { display: none; width: 48px; height: 48px; border: 2px solid var(--ink); border-radius: var(--radius); background: #fff; cursor: pointer; place-items: center; }
+.menu-btn span { display: block; width: 20px; height: 2px; background: var(--ink); position: relative; transition: transform .25s var(--ease), background-color .2s; }
+.menu-btn span::before, .menu-btn span::after { content: ''; position: absolute; left: 0; width: 20px; height: 2px; background: var(--ink); transition: transform .25s var(--ease); }
+.menu-btn span::before { top: -6px; } .menu-btn span::after { top: 6px; }
+.menu-btn[aria-expanded="true"] span { background: transparent; }
+.menu-btn[aria-expanded="true"] span::before { transform: translateY(6px) rotate(45deg); }
+.menu-btn[aria-expanded="true"] span::after { transform: translateY(-6px) rotate(-45deg); }
+
+/* Régua de rolagem: o quanto da página já foi "medido" */
+.ruler {
+  position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, var(--line-2) 0 1px, transparent 1px 10px) 0 0 / 100% 4px no-repeat,
+    repeating-linear-gradient(90deg, var(--ink-3) 0 1px, transparent 1px 50px) 0 0 / 100% 8px no-repeat;
+  opacity: 0; transition: opacity .3s var(--ease);
+}
+.top.scrolled .ruler { opacity: 1; }
+.ruler-fill { position: absolute; inset: 0 auto auto 0; height: 3px; width: 100%; background: var(--signal); transform-origin: left; transform: scaleX(var(--sp, 0)); }
+.ruler-read {
+  position: absolute; top: 10px; left: clamp(26px, calc(var(--sp, 0) * 100%), calc(100% - 30px)); transform: translateX(-50%);
+  font-size: .72rem; font-weight: 700; background: var(--ink); color: #fff; padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Hero ---------- */
+.hero { position: relative; min-height: max(640px, min(100svh, 900px)); display: flex; align-items: center; overflow: hidden; isolation: isolate; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#map { z-index: -2; }
+#map-ov { z-index: -1; }
+.hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.9) 34%, rgba(255,255,255,0) 62%);
+}
+.hero-in { padding-block: calc(var(--head-h) + 48px) 120px; position: relative; pointer-events: none; }
+.hero-in > * { pointer-events: auto; }
+.hero h1 { max-width: 11ch; }
+.hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; margin-bottom: -.06em; }
+.hero h1 .w > span { display: inline-block; }
+.lede { max-width: 46ch; margin-top: 28px; font-size: 1.15rem; color: var(--ink-2); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+
+.readout {
+  position: absolute; right: var(--gutter); bottom: 32px; z-index: 2; width: 300px;
+  background: rgba(255,255,255,.94); border: 1.5px solid var(--ink); border-radius: var(--radius); padding: 14px 16px 12px;
+  box-shadow: 6px 6px 0 var(--signal);
+}
+.ro-title { display: flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 700; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--signal); flex: none; animation: ping 1.8s infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(228,71,42,.55); } 80%, 100% { box-shadow: 0 0 0 9px rgba(228,71,42,0); } }
+.readout dl { margin: 10px 0 0; display: grid; gap: 4px; }
+.readout dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-top: 1px solid var(--line); padding-top: 4px; }
+.readout dt { font-size: .82rem; color: var(--ink-2); }
+.readout dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; font-variation-settings: 'wdth' 106; font-size: 1.02rem; }
+.readout dd.flash { animation: flash .8s var(--ease); }
+@keyframes flash { from { color: var(--signal-ink); } to { color: var(--ink); } }
+.ro-hint { margin-top: 8px; font-size: .78rem; color: var(--ink-3); line-height: 1.35; }
+
+/* ---------- Faixa rolante ---------- */
+.ticker { background: var(--signal); color: var(--ink); overflow: hidden; border-block: 2px solid var(--ink); }
+.ticker-track { display: flex; width: max-content; animation: tick 38s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker-track span { display: inline-flex; align-items: center; gap: 22px; padding: 14px 22px 14px 0; font-weight: 800; font-size: 1.15rem; font-variation-settings: 'wdth' 118; white-space: nowrap; }
+.ticker-track svg { width: 18px; height: 18px; flex: none; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- Seções ---------- */
+.section { padding-block: clamp(80px, 11vw, 140px); position: relative; }
+.sec-head { display: grid; gap: 18px; max-width: 760px; margin-bottom: clamp(40px, 6vw, 64px); }
+.sec-head p { color: var(--ink-2); font-size: 1.12rem; max-width: 56ch; }
+.dark { background: var(--ink); color: #fff; }
+
+/* ---------- A empresa ---------- */
+.about { padding-bottom: clamp(56px, 7vw, 90px); }
+.about-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 56px; align-items: end; }
+.about-years { display: flex; align-items: flex-end; gap: 18px; }
+.yrs-num { font-size: clamp(7rem, 17vw, 14rem); font-weight: 850; font-variation-settings: 'wdth' 125; line-height: .78; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.yrs-lbl { font-size: clamp(1.1rem, 1.8vw, 1.4rem); font-weight: 750; font-variation-settings: 'wdth' 110; line-height: 1.15; padding-bottom: .15em; }
+.about-text h2 { margin-bottom: 20px; }
+.about-text p { color: var(--ink-2); font-size: 1.12rem; max-width: 56ch; }
+.about-text p + p { margin-top: 14px; }
+.years-ruler { position: relative; height: 56px; margin: 72px 0 34px; border: 2px solid var(--ink); border-radius: 4px; background: #fff; --yp: 0; }
+.yr-fill { position: absolute; inset: 0; background: var(--signal); transform-origin: left; transform: scaleX(var(--yp)); }
+.yr-tick { position: absolute; top: 0; width: 1.5px; height: 32%; margin-left: -.75px; background: var(--ink); }
+.yr-tick.major { width: 2px; height: 58%; margin-left: -1px; }
+.yr-lbl { position: absolute; top: calc(100% + 8px); transform: translateX(-50%); font-weight: 700; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.yr-lbl.first { transform: none; }
+.yr-lbl.last { transform: translateX(-100%); }
+.yr-flag { position: absolute; bottom: calc(100% + 8px); font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.yr-flag.start { left: 0; }
+.yr-flag.end { right: 0; color: var(--signal-ink); }
+.dark .sec-head p { color: #c9c9c9; }
+.gray { background: var(--wash); }
+
+/* ---------- Serviços (abas) ---------- */
+.svc { display: grid; grid-template-columns: 270px 1fr; gap: 40px; align-items: start; }
+.svc-tabs { display: grid; border-top: 2px solid var(--ink); position: sticky; top: calc(var(--head-h) + 24px); }
+.svc-tabs [role="tab"] {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 58px; padding: 10px 14px;
+  border: 0; border-bottom: 1px solid var(--line-2); background: transparent; text-align: left; cursor: pointer;
+  font-weight: 650; font-size: 1.02rem; font-variation-settings: 'wdth' 104; transition: background-color .2s var(--ease), color .2s var(--ease);
+}
+.svc-tabs [role="tab"] svg { width: 26px; height: 26px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: color .2s; }
+.svc-tabs [role="tab"]:hover { background: var(--wash); }
+.svc-tabs [role="tab"][aria-selected="true"] { background: var(--ink); color: #fff; }
+.svc-tabs [role="tab"][aria-selected="true"] svg { color: var(--signal); }
+.svc-panel { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+.svc-panel[data-state="active"] .svc-text > * { animation: fadeUp .5s var(--ease) both; }
+.svc-panel[data-state="active"] .svc-text > :nth-child(2) { animation-delay: .05s; }
+.svc-panel[data-state="active"] .svc-text > :nth-child(3) { animation-delay: .1s; }
+.svc-panel[data-state="active"] .svc-text > :nth-child(4) { animation-delay: .15s; }
+.svc-panel[data-state="active"] .svc-text > :nth-child(5) { animation-delay: .2s; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.ill { margin: 0; border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff; overflow: hidden; }
+.ill svg { width: 100%; height: auto; }
+.ill figcaption { border-top: 1px solid var(--line-2); padding: 8px 14px; font-size: .8rem; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; }
+.ill figcaption button { border: 0; background: none; padding: 0 2px; min-height: 24px; color: var(--ink); font-weight: 650; font-size: .8rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.svc-text { display: grid; gap: 16px; }
+.svc-text p { color: var(--ink-2); }
+.svc-text .use { color: var(--ink); font-weight: 500; padding-left: 14px; border-left: 3px solid var(--signal); }
+.deliv { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.deliv li { display: flex; gap: 10px; align-items: flex-start; }
+.deliv li svg { width: 18px; height: 18px; flex: none; margin-top: 4px; color: var(--signal-ink); }
+.i-txt { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 650; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+.i-txt.b { font-weight: 800; font-size: 13px; }
+.i-txt.s { font-weight: 500; font-size: 11px; fill: var(--ink-3); }
+.svc-panel[data-state="active"] .i-flow { animation: flow 1.2s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -44; } }
+
+/* ---------- Processo ---------- */
+.proc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 60px; align-items: start; }
+.proc .sec-head { position: sticky; top: calc(var(--head-h) + 40px); }
+.pipe { position: relative; padding-left: 64px; --p: 0; }
+.pipe-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 56px; position: relative; z-index: 1; }
+.pipe::before, .pipe::after { content: ''; position: absolute; left: 21px; top: 10px; bottom: 10px; width: 2px; background: #3a3a3a; }
+.pipe::after { background: var(--signal); transform-origin: top; transform: scaleY(var(--p)); }
+.pipe .ball {
+  position: absolute; left: 22px; top: calc(10px + var(--p) * (100% - 20px)); width: 26px; height: 26px; margin: -13px 0 0 -13px; z-index: 1;
+  border-radius: 50%; background: var(--signal); border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(228,71,42,.25); z-index: 2;
+}
+.pipe .ball::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #000; }
+.pipe li { position: relative; }
+.pipe li h3, .pipe li p { color: #8a8a8a; transition: color .4s var(--ease); }
+.pipe li.on h3 { color: #fff; }
+.pipe li.on p { color: #c9c9c9; }
+
+.pipe .n { position: absolute; left: -64px; top: -2px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: #000; border: 2px solid #4a4a4a; font-weight: 800; font-variation-settings: 'wdth' 118; transition: border-color .3s, background-color .3s, color .3s; }
+.pipe li.on .n { border-color: var(--signal); }
+.pipe h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin-bottom: 10px; }
+.pipe p { max-width: 48ch; }
+
+/* ---------- Comparador ---------- */
+.model-grid { display: grid; gap: 28px; }
+.compare { position: relative; aspect-ratio: 2 / 1; border: 1.5px solid var(--ink); border-radius: var(--radius); overflow: hidden; background: #fff; --split: 50; user-select: none; }
+.compare canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#cmp-b { clip-path: inset(0 0 0 calc(var(--split) * 1%)); }
+.cmp-line { position: absolute; top: 0; bottom: 0; left: calc(var(--split) * 1%); width: 2px; margin-left: -1px; background: var(--ink); pointer-events: none; }
+.cmp-knob {
+  position: absolute; top: 50%; left: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+  background: var(--signal); border: 2px solid var(--ink); display: grid; place-items: center;
+}
+.cmp-knob svg { width: 22px; height: 22px; }
+.cmp-tag { position: absolute; top: 14px; padding: 4px 10px; font-size: .82rem; font-weight: 700; background: #fff; border: 1.5px solid var(--ink); border-radius: 4px; pointer-events: none; }
+.cmp-tag.a { left: 14px; } .cmp-tag.b { right: 14px; }
+.cmp-range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare:has(.cmp-range:focus-visible) { outline: 3px solid var(--signal); outline-offset: 3px; }
+.scan { position: absolute; top: 0; bottom: 0; left: -80px; width: 80px; pointer-events: none; background: linear-gradient(90deg, rgba(228,71,42,0), rgba(228,71,42,.35)); border-right: 2px solid var(--signal); opacity: 0; }
+.specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border-top: 2px solid var(--ink); }
+.specs > div { padding: 16px 16px 0 0; }
+.specs dt { font-size: .88rem; color: var(--ink-2); }
+.specs dd { margin: 4px 0 0; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; font-variation-settings: 'wdth' 115; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.specs dd small { font-size: .5em; font-weight: 700; margin-left: 4px; }
+.note { font-size: .85rem; color: var(--ink-3); }
+
+/* ---------- Memorial ---------- */
+.memo-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.memo-plot { margin: 0; border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff; overflow: hidden; }
+.memo-plot svg { width: 100%; height: auto; touch-action: none; }
+.memo-plot figcaption { border-top: 1px solid var(--line-2); padding: 8px 14px; font-size: .82rem; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.memo-plot figcaption button { border: 0; background: none; padding: 0; min-height: 24px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: .82rem; }
+.vtx { cursor: grab; outline: none; }
+.vtx:active { cursor: grabbing; }
+.vtx .hit { fill: transparent; }
+.vtx .mk { fill: var(--signal); stroke: #000; stroke-width: 1.5; transition: transform .15s var(--ease); transform-box: fill-box; transform-origin: center; }
+.vtx:hover .mk, .vtx:focus-visible .mk, .vtx.drag .mk { transform: scale(1.35); }
+.vtx:focus-visible .ring { stroke: var(--signal); stroke-width: 2.5; }
+.memo-out { display: grid; gap: 18px; }
+.memo-nums { display: grid; grid-template-columns: 1fr 1fr; margin: 0; border-top: 2px solid var(--ink); }
+.memo-nums > div { padding-top: 12px; }
+.memo-nums dt { font-size: .88rem; color: var(--ink-2); }
+.memo-nums dd { margin: 2px 0 0; font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 800; font-variation-settings: 'wdth' 112; font-variant-numeric: tabular-nums; }
+.memo-doc { border: 1.5px solid var(--ink); border-radius: var(--radius); padding: 18px 20px; background: #fff; min-height: 240px; max-height: 380px; overflow: auto; }
+.memo-doc h3 { font-size: 1rem; margin-bottom: 10px; font-variation-settings: 'wdth' 100; letter-spacing: 0; }
+.memo-doc p { font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; line-height: 1.65; text-align: justify; hyphens: auto; color: #1a1a1a; }
+.memo-doc .caret { display: inline-block; width: 2px; height: 1em; background: var(--signal); vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- Perguntas (acordeão) ---------- */
+.faq-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 48px; align-items: start; }
+.faq { border-top: 2px solid var(--ink); }
+.acc-item { border-bottom: 1px solid var(--line-2); }
+.acc-item h3 { margin: 0; font-size: inherit; letter-spacing: 0; }
+.acc-trigger {
+  width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; text-align: left;
+  min-height: 64px; padding: 14px 0; border: 0; background: none; cursor: pointer; font-weight: 700; font-size: 1.12rem; font-variation-settings: 'wdth' 104;
+}
+.acc-trigger:hover { color: var(--signal-ink); }
+.acc-trigger .pm { position: relative; width: 26px; height: 26px; flex: none; border: 1.5px solid currentColor; border-radius: 50%; }
+.acc-trigger .pm::before, .acc-trigger .pm::after { content: ''; position: absolute; left: 50%; top: 50%; width: 11px; height: 1.5px; background: currentColor; transform: translate(-50%, -50%); transition: transform .3s var(--ease); }
+.acc-trigger .pm::after { transform: translate(-50%, -50%) rotate(90deg); }
+.acc-trigger[aria-expanded="true"] .pm::after { transform: translate(-50%, -50%) rotate(0deg); }
+.acc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s var(--ease); }
+.acc-panel[data-state="open"] { grid-template-rows: 1fr; }
+.acc-panel > div { overflow: hidden; }
+.acc-panel p { padding: 0 40px 22px 0; color: var(--ink-2); max-width: 62ch; }
+
+/* ---------- Contato ---------- */
+.contact-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 56px; align-items: start; }
+.contact-list { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 10px; }
+.contact-list a { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-weight: 650; text-decoration: none; }
+.contact-list a:hover { color: var(--signal-ink); }
+.contact-list svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tips { margin-top: 36px; border-top: 2px solid var(--ink); padding-top: 20px; }
+.tips h3 { font-size: 1.15rem; margin-bottom: 14px; font-variation-settings: 'wdth' 106; letter-spacing: 0; }
+.tips ol { margin: 0; padding: 0; list-style: none; counter-reset: t; display: grid; gap: 12px; }
+.tips li { counter-increment: t; display: grid; grid-template-columns: 34px 1fr; gap: 10px; color: var(--ink-2); }
+.tips li::before { content: counter(t); width: 28px; height: 28px; border-radius: 50%; background: var(--signal); color: var(--ink); display: grid; place-items: center; font-weight: 800; font-size: .9rem; }
+.tips b { color: var(--ink); font-weight: 650; }
+.form { display: grid; gap: 18px; padding: 28px; border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff; box-shadow: 8px 8px 0 var(--ink); }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 650; font-size: .95rem; }
+.field .opt { font-weight: 400; color: var(--ink-3); }
+.field input, .field select, .field textarea {
+  width: 100%; min-height: 48px; padding: 10px 14px; border: 1.5px solid var(--ink-3); border-radius: var(--radius); background: #fff; font-size: 1rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input, .field select { height: 50px; }
+.field textarea { min-height: 110px; resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(228,71,42,.35); }
+.field [aria-invalid="true"] { border-color: var(--err); }
+.field .err { font-size: .85rem; color: var(--err); font-weight: 600; min-height: 0; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form .btn { justify-self: start; }
+
+/* ---------- Rodapé: carimbo de prancha ---------- */
+.foot { padding: 64px 0 calc(32px + env(safe-area-inset-bottom, 0px)); border-top: 2px solid var(--ink); }
+.stamp { display: grid; grid-template-columns: 150px 2fr 2fr 1.4fr .8fr .8fr; gap: 1.5px; background: var(--ink); border: 2px solid var(--ink); }
+.stamp > div { padding: 12px 14px; min-width: 0; background: #fff; }
+.stamp > div:first-child { display: grid; place-items: center; }
+.st-logo img { width: 128px; height: auto; }
+.st-k { display: block; font-size: .74rem; color: var(--ink-3); margin-bottom: 4px; }
+.stamp b { font-variation-settings: 'wdth' 110; }
+.stamp a { font-weight: 650; }
+.copy { margin-top: 18px; font-size: .85rem; color: var(--ink-3); }
+
+/* ---------- Avisos (toast) ---------- */
+.toaster { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 90; list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: min(380px, calc(100vw - 32px)); }
+.toast {
+  display: grid; grid-template-columns: 22px 1fr 28px; gap: 4px 12px; align-items: start; padding: 14px 14px 14px 16px;
+  background: #fff; border: 1.5px solid var(--ink); border-left: 6px solid var(--c); border-radius: var(--radius); box-shadow: 6px 6px 0 rgba(0,0,0,.12);
+  animation: toastIn .35s var(--ease);
+}
+.toast svg { width: 22px; height: 22px; color: var(--c); grid-row: span 2; }
+.toast b { font-weight: 750; }
+.toast p { grid-column: 2; font-size: .92rem; color: var(--ink-2); }
+.toast button { grid-row: 1; grid-column: 3; width: 28px; height: 28px; border: 0; background: none; cursor: pointer; font-size: 1.3rem; line-height: 1; border-radius: 4px; }
+.toast button:hover { background: var(--wash); }
+.toast.out { animation: toastOut .25s ease-in forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(24px); } }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 1080px) {
+  .menu-btn { display: grid; }
+  .nav {
+    position: fixed; top: var(--head-h); left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0;
+    background: #fff; border-bottom: 2px solid var(--ink); padding: 8px var(--gutter) 20px;
+    visibility: hidden; opacity: 0; transform: translateY(-8px); transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
+  }
+  .nav.open { visibility: visible; opacity: 1; transform: none; }
+  .nav a:not(.btn) { padding: 14px 4px; border-bottom: 1px solid var(--line); font-size: 1.1rem; }
+  .nav a:not(.btn)::after { display: none; }
+  .nav .btn { margin: 16px 0 0; }
+  .top { background: rgba(255,255,255,.94); }
+
+  .svc { grid-template-columns: 1fr; gap: 28px; }
+  .svc-tabs { position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 0; gap: 8px; }
+  .svc-tabs [role="tab"] { border: 1.5px solid var(--ink); border-radius: var(--radius); min-height: 54px; font-size: .95rem; }
+}
+@media (max-width: 900px) {
+  :root { --head-h: 64px; }
+  .compare { aspect-ratio: 4 / 3; }
+  .brand-logo { height: 54px; }
+  .svc-panel { grid-template-columns: 1fr; }
+  .proc, .memo-grid, .faq-grid, .contact-grid, .about-grid { grid-template-columns: 1fr; gap: 36px; }
+  .proc .sec-head { position: static; }
+  .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 8px; }
+  .hero { align-items: flex-start; min-height: 0; }
+  .hero::before { background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.86) 46%, rgba(255,255,255,0) 62%); }
+  .hero-in { padding-block: calc(var(--head-h) + 36px) 230px; }
+  .readout { left: var(--gutter); right: var(--gutter); width: auto; bottom: 20px; }
+  .readout dl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .readout dl div { display: grid; gap: 0; }
+  .readout dd { font-size: .92rem; }
+}
+@media (max-width: 820px) {
+  .stamp { grid-template-columns: 1fr 1fr; }
+  .stamp > div:nth-child(-n+4) { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .svc-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .svc-tabs [role="tab"] { gap: 10px; padding: 10px; font-size: .9rem; }
+  .svc-tabs [role="tab"] svg { width: 22px; height: 22px; }
+  .svc-tabs [role="tab"] span { min-width: 0; overflow-wrap: anywhere; }
+  .row2 { grid-template-columns: 1fr; }
+  .form { padding: 20px; box-shadow: 5px 5px 0 var(--ink); }
+  .brand-name span { display: none; }
+  .readout { box-shadow: 4px 4px 0 var(--signal); padding: 10px 12px; }
+  .readout dd { font-size: .8rem; }
+  .ro-hint { display: none; }
+  .pipe { padding-left: 56px; }
+  .pipe .n { left: -56px; width: 40px; height: 40px; }
+  .pipe::before, .pipe::after { left: 19px; }
+  .pipe .ball { left: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .ticker-track { animation: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="-12 -12 24 24"><circle r="7.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M0 -12V12M-12 0H12" stroke="currentColor" stroke-width="2.2"/><circle r="2" fill="currentColor"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-logo">
+    <img class="intro-img" src="logo-apoio.webp" width="800" height="740" alt="">
+  </div>
+</div>
+
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="top" id="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#inicio" aria-label="Apoio Agrimensura e Topografia, início">
+      <img class="brand-logo" src="logo-apoio.webp" width="800" height="740" alt="">
+      <span class="brand-name"><b>Apoio</b><span>Agrimensura e Topografia</span></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Principal">
+      <a href="#empresa">A empresa</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#processo">Como trabalhamos</a>
+      <a href="#memorial">Memorial</a>
+      <a href="#perguntas">Perguntas</a>
+      <a class="btn btn-sm" href="#contato">Pedir orçamento</a>
+    </nav>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menu"><span></span></button>
+  </div>
+  <div class="ruler" aria-hidden="true"><div class="ruler-fill"></div><span class="ruler-read" id="ruler-read">0 m</span></div>
+</header>
+
+<main id="conteudo">
+
+  <!-- ===== Hero: mapa topográfico vivo ===== -->
+  <section class="hero" id="inicio" aria-labelledby="hero-title">
+    <canvas id="map" aria-hidden="true"></canvas>
+    <canvas id="map-ov" aria-hidden="true"></canvas>
+    <div class="wrap hero-in">
+      <h1 id="hero-title">Do fundo do lago ao alto do morro.</h1>
+      <p class="lede">Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, delimitação de terrenos e usucapião. Medimos em campo e entregamos planta, memorial e arquivos prontos para prefeitura, cartório ou projeto.</p>
+      <div class="actions">
+        <a class="btn" href="#contato">Pedir orçamento</a>
+        <a class="btn btn-ghost" href="#servicos">Ver os serviços</a>
+      </div>
+    </div>
+    <div class="readout" id="readout">
+      <p class="ro-title"><span class="dot" aria-hidden="true"></span><span id="ro-src">Último ponto medido</span></p>
+      <dl>
+        <div><dt>Leste (E)</dt><dd id="ro-e">–</dd></div>
+        <div><dt>Norte (N)</dt><dd id="ro-n">–</dd></div>
+        <div><dt id="ro-zk">Cota</dt><dd id="ro-z">–</dd></div>
+      </dl>
+      <p class="ro-hint" id="ro-hint">Passe o mouse no mapa para ler a cota de qualquer ponto. Mapa ilustrativo.</p>
+    </div>
+  </section>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
+      <span>Levantamento planialtimétrico <svg><use href="#mark"/></svg> Levantamento cadastral <svg><use href="#mark"/></svg> Aerolevantamento com drone <svg><use href="#mark"/></svg> Fotogrametria <svg><use href="#mark"/></svg> Batimetria <svg><use href="#mark"/></svg> Delimitação de terrenos <svg><use href="#mark"/></svg> Usucapião <svg><use href="#mark"/></svg> Curvas de nível <svg><use href="#mark"/></svg> Memorial descritivo <svg><use href="#mark"/></svg></span>
+    </div>
+  </div>
+
+  <!-- ===== A empresa: desde 2001 ===== -->
+  <section class="section about" id="empresa" aria-labelledby="about-title">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-years" aria-hidden="true">
+          <span class="yrs-num" id="yrs-num">25</span>
+          <span class="yrs-lbl">anos de<br>empresa</span>
+        </div>
+        <div class="about-text">
+          <h2 id="about-title">Desde 2001 no campo</h2>
+          <p>A Apoio Agrimensura e Topografia começou em 2001. De lá para cá são <span class="yrs">25</span> anos medindo terrenos, redes, lagos e áreas inteiras, sempre com o mesmo empenho do primeiro levantamento.</p>
+          <p>Nesse tempo os equipamentos mudaram muito, e hoje o trabalho conta com GPS RTK e drone. O que não mudou foi o jeito de trabalhar: chegar ao campo preparado, medir com cuidado e entregar um resultado em que o cliente pode confiar.</p>
+        </div>
+      </div>
+      <div class="years-ruler" id="years-ruler" aria-hidden="true">
+        <div class="yr-fill"></div>
+        <span class="yr-flag start">Fundação</span>
+        <span class="yr-flag end">Hoje</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Serviços ===== -->
+  <section class="section" id="servicos" aria-labelledby="svc-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="scr" id="svc-title">O que a gente mede</h2>
+        <p>Do lote na cidade à represa na fazenda. Escolha um serviço para ver como ele é feito e o que você recebe no final.</p>
+      </div>
+      <div class="svc">
+        <div class="svc-tabs" role="tablist" aria-label="Serviços" aria-orientation="vertical" id="svc-tabs">
+          <button role="tab" type="button" id="t-plani" aria-controls="p-plani" aria-selected="true" tabindex="0" data-ill="plani">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 7.5c4-3 7.5 2 11.5-.5s5.5-1.5 7.5 0M2.5 12.5c4-3 7.5 2 11.5-.5s5.5-1.5 7.5 0M2.5 17.5c4-3 7.5 2 11.5-.5s5.5-1.5 7.5 0"/></svg>
+            <span>Planialtimétrico</span>
+          </button>
+          <button role="tab" type="button" id="t-cad" aria-controls="p-cad" aria-selected="false" tabindex="-1" data-ill="cad">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 9h12M4.5 12h15M6 15h12"/></svg>
+            <span>Cadastral</span>
+          </button>
+          <button role="tab" type="button" id="t-aero" aria-controls="p-aero" aria-selected="false" tabindex="-1" data-ill="aero">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7.5l9 9M16.5 7.5l-9 9"/><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="18" r="2.6"/><rect x="10" y="10" width="4" height="4"/></svg>
+            <span>Aerolevantamento</span>
+          </button>
+          <button role="tab" type="button" id="t-bat" aria-controls="p-bat" aria-selected="false" tabindex="-1" data-ill="bat">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h12l-2 3H6z"/><path d="M12 2.5V19M9.5 2.5h5"/><path d="M2 12.5c2-1.2 4-1.2 6 0s4 1.2 6 0 4-1.2 8 0"/><path d="M2.5 21l5-2 4.5 1 4.5-1.5 5 1.5"/></svg>
+            <span>Batimetria</span>
+          </button>
+          <button role="tab" type="button" id="t-del" aria-controls="p-del" aria-selected="false" tabindex="-1" data-ill="del">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5l13.5-1.5 1.5 14.5-15.5 1.5z"/><rect x="3" y="4" width="3.5" height="3.5" fill="currentColor"/><rect x="17" y="2.5" width="3.5" height="3.5" fill="currentColor"/><rect x="18.5" y="17" width="3.5" height="3.5" fill="currentColor"/><rect x="2.5" y="18" width="3.5" height="3.5" fill="currentColor"/></svg>
+            <span>Delimitação</span>
+          </button>
+          <button role="tab" type="button" id="t-usu" aria-controls="p-usu" aria-selected="false" tabindex="-1" data-ill="usu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8.5l4 4v15H6z"/><path d="M14.5 2.5v4h4M9 11.5h6.5M9 14.5h6.5M9 17.5h4"/></svg>
+            <span>Usucapião</span>
+          </button>
+        </div>
+
+        <div class="svc-panels">
+          <!-- Planialtimétrico -->
+          <div class="svc-panel" role="tabpanel" id="p-plani" aria-labelledby="t-plani" data-state="active" tabindex="0">
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-plani" role="img" aria-label="Planta de um terreno com curvas de nível, uma casa e árvores, com pontos medidos por uma estação total">
+                <defs><clipPath id="clip-lot"><polygon points="70,50 405,38 428,282 92,298"/></clipPath></defs>
+                <g class="i-contours" clip-path="url(#clip-lot)" fill="none" stroke-width="1.4">
+                  <path d="M40 100 C150 75 260 130 450 90" stroke="#cfcfcf"/>
+                  <path d="M40 148 C150 123 265 183 450 143" stroke="#e4472a" stroke-opacity=".6" stroke-width="1.8"/>
+                  <path d="M40 198 C150 173 270 233 450 193" stroke="#cfcfcf"/>
+                  <path d="M40 248 C155 226 275 283 450 243" stroke="#cfcfcf"/>
+                  <path d="M40 296 C160 276 280 331 450 291" stroke="#cfcfcf"/>
+                </g>
+                <polygon class="i-lot" points="70,50 405,38 428,282 92,298" fill="none" stroke="#000" stroke-width="2"/>
+                <g class="i-house">
+                  <rect x="175" y="118" width="120" height="82" fill="#f4f4f4" stroke="#000" stroke-width="1.5"/>
+                  <path d="M175 118L216 159L175 200M295 118L254 159L295 200M216 159H254" fill="none" stroke="#000"/>
+                </g>
+                <g class="i-tree" fill="none" stroke="#000" stroke-width="1.2" stroke-dasharray="3 3"><circle cx="360" cy="95" r="20"/><circle cx="125" cy="245" r="24"/></g>
+                <g class="i-tree"><circle cx="360" cy="95" r="2.2"/><circle cx="125" cy="245" r="2.2"/></g>
+                <text class="i-txt s" x="300" y="148" transform="rotate(-6 300 148)">curva de 745 m</text>
+                <g class="i-pts"></g>
+                <g class="i-station" transform="translate(452 312)">
+                  <path d="M0 -10L-10 16M0 -10L10 16M0 -10V16" fill="none" stroke="#000" stroke-width="1.8"/>
+                  <rect x="-7" y="-22" width="14" height="12" rx="2" fill="#e4472a" stroke="#000" stroke-width="1.5"/>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Levantamento planialtimétrico</h3>
+              <p>Medimos a posição e a altura de tudo o que existe no terreno: divisas, muros, construções, árvores, postes, guias e o próprio relevo. O resultado mostra o terreno como ele é, com cotas e curvas de nível.</p>
+              <p class="use">Para projeto de casa ou prédio, terraplenagem, drenagem, aprovação na prefeitura e compra de terreno.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Planta planialtimétrica em PDF e DWG</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Cotas e curvas de nível de todo o terreno</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Tabela com as coordenadas dos pontos medidos</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Cadastral -->
+          <div class="svc-panel" role="tabpanel" id="p-cad" aria-labelledby="t-cad" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-cad" role="img" aria-label="Corte de um poço de visita: o tampão é aberto e medimos a profundidade e o diâmetro da tubulação">
+                <defs><pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="#d9d9d9" stroke-width="2.4"/></pattern></defs>
+                <rect x="0" y="98" width="480" height="242" fill="url(#hatch)"/>
+                <rect x="0" y="86" width="480" height="12" fill="#3a3a3a"/>
+                <rect x="196" y="98" width="88" height="194" fill="#fff"/>
+                <rect x="0" y="242" width="480" height="48" fill="#fff"/>
+                <path d="M0 242H186M294 242H480M0 290H186M294 290H480" stroke="#000" stroke-width="1.6"/>
+                <rect x="186" y="98" width="10" height="144" fill="#bdbdbd" stroke="#000" stroke-width="1.2"/>
+                <rect x="284" y="98" width="10" height="144" fill="#bdbdbd" stroke="#000" stroke-width="1.2"/>
+                <rect x="186" y="290" width="108" height="12" fill="#bdbdbd" stroke="#000" stroke-width="1.2"/>
+                <path class="i-flow" d="M8 268H472" stroke="#2d6a9f" stroke-width="2.4" stroke-dasharray="14 8" fill="none"/>
+                <path d="M462 262l10 6-10 6" stroke="#2d6a9f" stroke-width="2.4" fill="none"/>
+                <g class="i-lid"><rect x="190" y="82" width="100" height="9" fill="#111"/><path d="M200 82v-3h80v3" fill="#111"/><path d="M204 86.5h72" stroke="#555" stroke-width="1.2"/></g>
+                <g class="i-tape"><line x1="240" y1="91" x2="240" y2="290" stroke="#e4472a" stroke-width="3"/><path d="M234 290h12" stroke="#e4472a" stroke-width="3"/></g>
+                <g class="i-dimd" fill="none" stroke="#000" stroke-width="1.2">
+                  <path d="M318 91V290M312 91h12M312 290h12"/>
+                </g>
+                <g class="i-lbl-d">
+                  <rect x="328" y="160" width="120" height="44" fill="#fff" stroke="#000" stroke-width="1.2" rx="3"/>
+                  <text class="i-txt s" x="338" y="177">Profundidade</text>
+                  <text class="i-txt b" x="338" y="195"><tspan class="v-depth">2,35</tspan> m</text>
+                </g>
+                <g class="i-dimo" fill="none" stroke="#000" stroke-width="1.2"><path d="M120 242V290M114 242h12M114 290h12"/></g>
+                <g class="i-lbl-o">
+                  <rect x="40" y="200" width="104" height="30" fill="#fff" stroke="#000" stroke-width="1.2" rx="3"/>
+                  <text class="i-txt b" x="50" y="220">Ø <tspan class="v-diam">600</tspan> mm</text>
+                </g>
+                <g class="i-lbl-t">
+                  <text class="i-txt s" x="16" y="32">Cota da tampa</text>
+                  <text class="i-txt b" x="16" y="52">742,18 m</text>
+                </g>
+                <g class="i-lbl-f">
+                  <rect x="328" y="300" width="138" height="34" fill="#fff" stroke="#000" stroke-width="1.2" rx="3"/>
+                  <text class="i-txt s" x="338" y="314">Cota de fundo</text>
+                  <text class="i-txt b" x="338" y="329"><tspan class="v-fundo">739,83</tspan> m</text>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Levantamento cadastral</h3>
+              <p>Cadastramos as redes de esgoto, drenagem e águas pluviais. Abrimos os tampões, medimos a cota da tampa e do fundo, a profundidade, o diâmetro das tubulações e o sentido do escoamento.</p>
+              <p class="use">Para projetos de saneamento e drenagem, ligações de condomínios e loteamentos e atualização de cadastro de redes.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Planta cadastral com a posição de cada poço e caixa</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Ficha de cada tampão com cotas, profundidade e diâmetros</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Arquivos em DWG e PDF</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Aerolevantamento -->
+          <div class="svc-panel" role="tabpanel" id="p-aero" aria-labelledby="t-aero" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-aero" role="img" aria-label="Vista de cima de uma área: o drone voa em faixas paralelas e cada foto cobre parte da anterior">
+                <rect width="480" height="340" fill="#f6f6f6"/>
+                <g class="i-ortho">
+                  <path d="M0 0H200L170 150H0Z" fill="#dfe8d6"/>
+                  <path d="M200 0H480V120L330 140L170 150Z" fill="#ece6d6"/>
+                  <path d="M0 150H170L330 140L480 120V340H0Z" fill="#d6e2cc"/>
+                  <path d="M300 200C340 180 420 190 430 230C440 270 380 300 330 285C290 270 270 220 300 200Z" fill="#cfe0ee" stroke="#2d6a9f" stroke-width="1.2"/>
+                  <path d="M-10 312C120 290 230 300 490 250" stroke="#fff" stroke-width="14" fill="none"/>
+                  <path d="M-10 312C120 290 230 300 490 250" stroke="#cfcfcf" stroke-width="1" fill="none" stroke-dasharray="8 8"/>
+                  <g fill="#b9cfa8"><circle cx="70" cy="60" r="9"/><circle cx="90" cy="80" r="11"/><circle cx="60" cy="96" r="8"/><circle cx="120" cy="200" r="10"/><circle cx="140" cy="222" r="8"/></g>
+                  <g fill="#fff" stroke="#9a9a9a"><rect x="230" y="40" width="44" height="30"/><rect x="290" y="56" width="30" height="40"/></g>
+                </g>
+                <g class="i-foot"></g>
+                <path class="i-path" d="M50 50H430V115H50V180H430V245H50V310H430" fill="none" stroke="#e4472a" stroke-width="1.6"/>
+                <g class="i-drone">
+                  <path d="M-10 -10L10 10M10 -10L-10 10" stroke="#000" stroke-width="3"/>
+                  <g fill="#fff" stroke="#000" stroke-width="1.6"><circle cx="-11" cy="-11" r="6"/><circle cx="11" cy="-11" r="6"/><circle cx="-11" cy="11" r="6"/><circle cx="11" cy="11" r="6"/></g>
+                  <rect x="-5" y="-5" width="10" height="10" fill="#e4472a" stroke="#000" stroke-width="1.5"/>
+                </g>
+                <g class="i-done">
+                  <rect x="150" y="146" width="180" height="48" rx="4" fill="#000"/>
+                  <text x="240" y="167" text-anchor="middle" fill="#fff" font-size="13" font-weight="800" font-family="Archivo, sans-serif">Ortofoto pronta</text>
+                  <text class="v-fotos" x="240" y="184" text-anchor="middle" fill="#cfcfcf" font-size="11" font-family="Archivo, sans-serif">fotos com sobreposição</text>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Aerolevantamento com drone</h3>
+              <p>O drone voa a área em faixas, tirando fotos que se sobrepõem. Por fotogrametria, essas fotos viram ortofoto, modelo digital do terreno, nuvem de pontos e curvas de nível.</p>
+              <p class="use">Indicado para áreas grandes ou de acesso difícil, acompanhamento de obras, volumes de terra e planejamento rural.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Ortofoto: o mosaico das fotos, georreferenciado</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Modelo digital do terreno e da superfície</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Nuvem de pontos e curvas de nível</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Batimetria -->
+          <div class="svc-panel" role="tabpanel" id="p-bat" aria-labelledby="t-bat" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-bat" role="img" aria-label="Corte de um lago: a equipe no bote desce o bastão com o GPS RTK até o fundo e coleta os pontos um a um">
+                <defs>
+                  <pattern id="hatch2" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="#d9d9d9" stroke-width="2.4"/></pattern>
+                  <clipPath id="bat-clip"><rect class="bat-clip-r" x="0" y="0" width="0" height="340"/></clipPath>
+                </defs>
+                <path class="bat-ground" fill="url(#hatch2)"/>
+                <path class="bat-water" fill="#e4eef6"/>
+                <path class="bat-unknown" fill="none" stroke="#9fb6cb" stroke-width="1.5" stroke-dasharray="4 5"/>
+                <path class="bat-known" fill="none" stroke="#e4472a" stroke-width="2.8" stroke-linecap="round" clip-path="url(#bat-clip)"/>
+                <g class="bat-pts"></g>
+                <line x1="0" y1="100" x2="480" y2="100" stroke="#2d6a9f" stroke-width="2"/>
+                <g class="bat-rig">
+                  <line class="bat-pole" x1="8" y1="-46" x2="8" y2="4" stroke="#000" stroke-width="2.2"/>
+                  <g transform="translate(8 -48)"><ellipse rx="10" ry="4" fill="#e4472a" stroke="#000" stroke-width="1.3"/><rect x="-2" y="3" width="4" height="4" fill="#000"/></g>
+                  <text class="i-txt b" x="8" y="-58" text-anchor="middle">RTK</text>
+                  <circle cx="-8" cy="-24" r="5" fill="#fff" stroke="#000" stroke-width="1.6"/>
+                  <path d="M-8 -19V-7M-8 -14L7 -18" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="-22" cy="-20" r="4.5" fill="#fff" stroke="#000" stroke-width="1.6"/>
+                  <path d="M-22 -15.5V-7" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
+                  <path d="M-34 -7H30L22 6H-28Z" fill="#000"/>
+                </g>
+                <g class="bat-lbl">
+                  <rect x="-44" y="-13" width="88" height="24" rx="3" fill="#fff" stroke="#000" stroke-width="1.2"/>
+                  <text class="i-txt b" x="0" y="4" text-anchor="middle"><tspan class="v-depth2">0,0</tspan> m</text>
+                </g>
+                <text class="i-txt s" x="14" y="88">nível da água</text>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Batimetria</h3>
+              <p>Medimos o fundo de lagos, represas e lagoas com a equipe embarcada num bote. Com o GPS RTK, coletamos ponto a ponto a posição e a altura do fundo. Com esses pontos se calcula a profundidade em cada lugar, o volume de água e onde há assoreamento.</p>
+              <p class="use">Para desassoreamento, captação de água, outorga, projetos de barragem e obras na margem.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Planta batimétrica com as linhas de profundidade</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Perfis do fundo nos trechos que interessam</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Cálculo de área e volume de água</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Delimitação -->
+          <div class="svc-panel" role="tabpanel" id="p-del" aria-labelledby="t-del" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-del" role="img" aria-label="Planta de um lote: marcos são cravados nos cantos e as divisas são medidas uma a uma">
+                <rect width="480" height="340" fill="#fff"/>
+                <g stroke="#efefef" stroke-width="1">
+                  <path d="M0 40H480M0 80H480M0 120H480M0 160H480M0 200H480M0 240H480M0 280H480M40 0V340M80 0V340M120 0V340M160 0V340M200 0V340M240 0V340M280 0V340M320 0V340M360 0V340M400 0V340M440 0V340"/>
+                </g>
+                <rect x="0" y="306" width="480" height="34" fill="#ececec"/>
+                <text class="i-txt s" x="240" y="327" text-anchor="middle">Rua</text>
+                <text class="i-txt s" x="240" y="26" text-anchor="middle">Vizinho dos fundos</text>
+                <text class="i-txt s" x="30" y="175" text-anchor="middle" transform="rotate(-90 30 175)">Vizinho</text>
+                <text class="i-txt s" x="452" y="165" text-anchor="middle" transform="rotate(90 452 165)">Vizinho</text>
+                <polygon class="del-fill" fill="#e4472a" fill-opacity=".08"/>
+                <g class="del-edges" fill="none" stroke="#000" stroke-width="2"></g>
+                <g class="del-lbls"></g>
+                <g class="del-marks"></g>
+                <g class="del-area">
+                  <text class="i-txt s" x="244" y="160" text-anchor="middle">Área do lote</text>
+                  <text class="i-txt b" x="244" y="180" text-anchor="middle" style="font-size:17px"><tspan class="v-area">0,0</tspan> m²</text>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Delimitação de terrenos</h3>
+              <p>Localizamos as divisas do imóvel em campo, conferimos com a escritura e a matrícula e marcamos os cantos com marcos. Você fica sabendo exatamente onde o seu terreno começa e termina.</p>
+              <p class="use">Para construir o muro no lugar certo, resolver dúvida com vizinho, desmembrar ou unificar lotes e retificar a área na matrícula.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Marcos nos vértices do terreno</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Planta com medidas, ângulos e confrontantes</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Memorial descritivo do perímetro</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Usucapião -->
+          <div class="svc-panel" role="tabpanel" id="p-usu" aria-labelledby="t-usu" data-state="inactive" tabindex="0" hidden>
+            <figure class="ill">
+              <svg viewBox="0 0 480 340" id="ill-usu" role="img" aria-label="Folha com a planta do imóvel e o memorial descritivo sendo escrito, pronta para o processo de usucapião">
+                <rect x="150" y="30" width="220" height="292" fill="#f2f2f2" stroke="#cfcfcf" transform="rotate(-4 260 176)"/>
+                <rect class="usu-sheet" x="128" y="22" width="220" height="298" fill="#fff" stroke="#000" stroke-width="1.6"/>
+                <rect x="144" y="38" width="188" height="112" fill="none" stroke="#cfcfcf"/>
+                <polygon class="usu-lot" points="172,58 300,50 314,132 162,138" fill="#e4472a" fill-opacity=".08" stroke="#000" stroke-width="1.6"/>
+                <g class="usu-v" fill="#e4472a" stroke="#000"><rect x="168" y="54" width="8" height="8"/><rect x="296" y="46" width="8" height="8"/><rect x="310" y="128" width="8" height="8"/><rect x="158" y="134" width="8" height="8"/></g>
+                <text x="144" y="172" font-family="Archivo, sans-serif" font-size="12" font-weight="800">Memorial descritivo</text>
+                <g class="usu-lines" fill="#cfcfcf">
+                  <rect x="144" y="182" width="188" height="5"/><rect x="144" y="194" width="180" height="5"/><rect x="144" y="206" width="188" height="5"/>
+                  <rect x="144" y="218" width="150" height="5"/><rect x="144" y="230" width="188" height="5"/><rect x="144" y="242" width="172" height="5"/>
+                  <rect x="144" y="254" width="120" height="5"/>
+                </g>
+                <path class="usu-sign" d="M228 292c6-12 10-14 12-6s-4 10 2 4 8-14 12-6 2 8 8 2 8-6 12-2 6 4 14 0" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M222 302h112" stroke="#000"/>
+                <g class="usu-stamp" transform="translate(178 286)"><image href="logo-apoio.webp" x="-27" y="-25" width="54" height="50"/></g>
+                <g class="usu-call" fill="none" stroke="#000" stroke-width="1"><path d="M110 96H150"/><path d="M372 216H336"/></g>
+                <g class="usu-call">
+                  <text class="i-txt b" x="104" y="92" text-anchor="end">Planta</text>
+                  <text class="i-txt s" x="104" y="108" text-anchor="end">com medidas</text>
+                  <text class="i-txt b" x="378" y="212">Memorial</text>
+                  <text class="i-txt s" x="378" y="228">vértice a vértice</text>
+                </g>
+              </svg>
+              <figcaption><span>Exemplo ilustrativo</span><button type="button" class="replay">Ver de novo</button></figcaption>
+            </figure>
+            <div class="svc-text">
+              <h3>Usucapião</h3>
+              <p>Fazemos o levantamento, a planta e o memorial descritivo que o processo de usucapião pede, seja na Justiça ou no cartório, com a área, as medidas e os confrontantes do imóvel.</p>
+              <p class="use">O levantamento técnico fica com a gente; a parte jurídica segue com o seu advogado ou com o cartório.</p>
+              <h4>Você recebe</h4>
+              <ul class="deliv">
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Planta do imóvel com área e medidas</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Memorial descritivo do perímetro</li>
+                <li><svg aria-hidden="true"><use href="#check"/></svg>Identificação dos confrontantes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Processo ===== -->
+  <section class="section dark" id="processo" aria-labelledby="proc-title">
+    <div class="wrap proc">
+      <div class="sec-head">
+        <h2 class="scr" id="proc-title">Do primeiro contato à entrega</h2>
+        <p>Como um levantamento acontece, do seu pedido até os arquivos na sua mão.</p>
+      </div>
+      <div class="pipe" id="pipe">
+        <span class="ball" aria-hidden="true"></span>
+        <ol class="pipe-list">
+        <li><span class="n" aria-hidden="true">1</span><h3>Conversa e orçamento</h3><p>Você conta o que precisa e onde fica o imóvel. Com o endereço e o objetivo do trabalho, passamos o orçamento e o prazo.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><h3>Planejamento</h3><p>Escolhemos o método certo para o caso: estação total, GPS RTK, drone ou bote. Reunimos matrícula, escritura e projetos que já existam.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><h3>Campo</h3><p>A equipe vai ao local e mede: pontos do terreno, divisas, tampões, o voo do drone ou os pontos do fundo do lago.</p></li>
+        <li><span class="n" aria-hidden="true">4</span><h3>Escritório</h3><p>Processamos os dados, calculamos coordenadas, áreas e volumes e desenhamos a planta.</p></li>
+        <li><span class="n" aria-hidden="true">5</span><h3>Entrega</h3><p>Você recebe a planta, o memorial e os arquivos digitais, e explicamos o resultado.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Do voo ao modelo ===== -->
+  <section class="section gray" id="modelo" aria-labelledby="model-title">
+    <div class="wrap model-grid">
+      <div class="sec-head" style="margin-bottom:12px">
+        <h2 class="scr" id="model-title">Do voo ao modelo do terreno</h2>
+        <p>Com as fotos do drone geramos o modelo digital do terreno. Dele saem as curvas de nível, as áreas e os volumes. Arraste a barra para comparar os dois.</p>
+      </div>
+      <div class="compare" id="compare">
+        <canvas id="cmp-a" aria-hidden="true"></canvas>
+        <canvas id="cmp-b" aria-hidden="true"></canvas>
+        <div class="scan" id="scan"></div>
+        <div class="cmp-line"><span class="cmp-knob"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg></span></div>
+        <span class="cmp-tag a">Modelo do terreno</span>
+        <span class="cmp-tag b">Curvas de nível</span>
+        <input class="cmp-range" id="cmp-range" type="range" min="0" max="100" step="1" value="50" aria-label="Comparar o modelo do terreno com as curvas de nível">
+      </div>
+      <dl class="specs" id="specs">
+        <div><dt>Área do exemplo</dt><dd><span class="count" id="sp-area">0</span><small>ha</small></dd></div>
+        <div><dt>Cota mais baixa</dt><dd><span class="count" id="sp-min">0</span><small>m</small></dd></div>
+        <div><dt>Cota mais alta</dt><dd><span class="count" id="sp-max">0</span><small>m</small></dd></div>
+        <div><dt>Desnível</dt><dd><span class="count" id="sp-dz">0</span><small>m</small></dd></div>
+      </dl>
+      <p class="note">Imagem ilustrativa: o terreno de exemplo é gerado aqui mesmo, na página.</p>
+    </div>
+  </section>
+
+  <!-- ===== Memorial interativo ===== -->
+  <section class="section" id="memorial" aria-labelledby="memo-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="scr" id="memo-title">Da medição ao memorial descritivo</h2>
+        <p>O memorial descreve o perímetro do imóvel vértice a vértice, com coordenadas, azimutes e distâncias. É o documento que a prefeitura, o cartório e o juiz leem. Mexa no terreno de exemplo e veja o texto mudar.</p>
+      </div>
+      <div class="memo-grid">
+        <figure class="memo-plot">
+          <svg id="memo-svg" viewBox="0 0 400 300" role="group" aria-label="Terreno de exemplo com vértices que podem ser movidos">
+            <g stroke="#eeeeee" stroke-width="1" id="memo-grid"></g>
+            <g id="memo-north" transform="translate(370 34)"><path d="M0 -18L7 8L0 3L-7 8Z" fill="#000"/><text x="0" y="22" text-anchor="middle" font-size="11" font-weight="800" font-family="Archivo, sans-serif">N</text></g>
+            <g transform="translate(16 284)"><path d="M0 0H80M0 -4V4M40 -3V3M80 -4V4" stroke="#000" stroke-width="1.4" fill="none"/><text x="86" y="4" font-size="10" font-family="Archivo, sans-serif">10 m</text></g>
+            <polygon id="memo-poly" fill="#e4472a" fill-opacity=".09" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+            <g id="memo-edges"></g>
+            <g id="memo-vtx"></g>
+          </svg>
+          <figcaption><span>Arraste os vértices, ou selecione um com Tab e use as setas.</span><button type="button" id="m-reset">Voltar ao terreno original</button></figcaption>
+        </figure>
+        <div class="memo-out">
+          <dl class="memo-nums" aria-live="polite">
+            <div><dt>Área</dt><dd id="m-area">–</dd></div>
+            <div><dt>Perímetro</dt><dd id="m-per">–</dd></div>
+          </dl>
+          <div class="memo-doc">
+            <h3>Memorial descritivo (exemplo)</h3>
+            <p id="m-text"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Perguntas ===== -->
+  <section class="section gray" id="perguntas" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <div class="sec-head">
+        <h2 class="scr" id="faq-title">Perguntas que a gente sempre ouve</h2>
+        <p>Se a sua dúvida não estiver aqui, mande pelo formulário de orçamento.</p>
+      </div>
+      <div class="faq" id="faq">
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q1" aria-expanded="false" aria-controls="a1">Qual a diferença entre planimétrico e planialtimétrico?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a1" role="region" aria-labelledby="q1" data-state="closed"><div><p>O planimétrico mede só a posição das coisas: divisas, construções e medidas em planta. O planialtimétrico mede também a altura, com cotas e curvas de nível que mostram o relevo. É ele que se usa para projeto de construção, terraplenagem e drenagem.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q2" aria-expanded="false" aria-controls="a2">O que entra no levantamento cadastral de redes?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a2" role="region" aria-labelledby="q2" data-state="closed"><div><p>Abrimos os tampões dos poços de visita e das caixas e medimos a cota da tampa e do fundo, a profundidade, o diâmetro e o material das tubulações e o sentido do escoamento. Tudo vai para a planta, com a posição de cada peça.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q3" aria-expanded="false" aria-controls="a3">Quando vale usar drone em vez do levantamento em campo?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a3" role="region" aria-labelledby="q3" data-state="closed"><div><p>Em áreas grandes ou de acesso difícil, o aerolevantamento cobre muitos hectares em pouco tempo e gera ortofoto, modelo do terreno e curvas de nível. Em lotes pequenos ou com muita vegetação fechada, o levantamento em campo costuma ser melhor. Indicamos o método no orçamento.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q4" aria-expanded="false" aria-controls="a4">O que vocês fazem no processo de usucapião?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a4" role="region" aria-labelledby="q4" data-state="closed"><div><p>A parte técnica: o levantamento do imóvel, a planta e o memorial descritivo com área, medidas e confrontantes. Os demais documentos e o andamento do processo ficam com o seu advogado ou com o cartório.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q5" aria-expanded="false" aria-controls="a5">Para que serve a batimetria?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a5" role="region" aria-labelledby="q5" data-state="closed"><div><p>Ela mede a profundidade e o relevo do fundo de lagos, represas e lagoas. A equipe vai num bote e coleta os pontos do fundo com GPS RTK. Com isso se calcula o volume de água, se acompanha o assoreamento e se planeja desassoreamento, captação ou obras na margem.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <h3><button class="acc-trigger" type="button" id="q6" aria-expanded="false" aria-controls="a6">Quanto custa e quanto tempo leva?<span class="pm" aria-hidden="true"></span></button></h3>
+          <div class="acc-panel" id="a6" role="region" aria-labelledby="q6" data-state="closed"><div><p>Depende do tamanho da área, do tipo de levantamento e do acesso ao local. Mande o endereço e o que você precisa que passamos o valor e o prazo.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contato ===== -->
+  <section class="section" id="contato" aria-labelledby="contact-title">
+    <div class="wrap contact-grid">
+      <div>
+        <div class="sec-head" style="margin-bottom:0">
+          <h2 class="scr" id="contact-title">Peça seu orçamento</h2>
+          <p>Conte o que você precisa e onde fica o imóvel. Respondemos com o valor e o prazo.</p>
+        </div>
+        <ul class="contact-list" id="contact-list"></ul>
+        <div class="tips">
+          <h3>Para agilizar o orçamento, mande</h3>
+          <ol>
+            <li><span><b>Onde fica o imóvel:</b> endereço, ponto no mapa ou nome da fazenda.</span></li>
+            <li><span><b>Tamanho aproximado:</b> metros quadrados, hectares ou a extensão da rede ou do lago.</span></li>
+            <li><span><b>Para que é o trabalho:</b> projeto, prefeitura, cartório, processo ou obra.</span></li>
+            <li><span><b>Documentos que você tiver:</b> matrícula, escritura ou plantas antigas.</span></li>
+          </ol>
+        </div>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="row2">
+          <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" autocomplete="name" required aria-describedby="e-nome"><span class="err" id="e-nome"></span></div>
+          <div class="field"><label for="f-tel">Telefone ou WhatsApp</label><input id="f-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" required aria-describedby="e-tel"><span class="err" id="e-tel"></span></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-serv">Serviço</label>
+            <select id="f-serv" name="servico" required aria-describedby="e-serv">
+              <option value="">Escolha um serviço</option>
+              <option>Levantamento planialtimétrico</option>
+              <option>Levantamento cadastral</option>
+              <option>Aerolevantamento com drone</option>
+              <option>Batimetria</option>
+              <option>Delimitação de terreno</option>
+              <option>Usucapião</option>
+              <option>Ainda não sei</option>
+            </select><span class="err" id="e-serv"></span></div>
+          <div class="field"><label for="f-local">Cidade do imóvel <span class="opt">(opcional)</span></label><input id="f-local" name="local" autocomplete="address-level2"></div>
+        </div>
+        <div class="field"><label for="f-msg">O que você precisa <span class="opt">(opcional)</span></label><textarea id="f-msg" name="mensagem" placeholder="Ex.: terreno de 360 m² para projeto de casa"></textarea></div>
+        <button class="btn" type="submit">Enviar pedido de orçamento</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="stamp">
+      <div class="st-logo"><img src="logo-apoio.webp" width="800" height="740" alt="Logo da Apoio Agrimensura e Topografia" loading="lazy"></div>
+      <div><span class="st-k">Empresa</span><b>Apoio Agrimensura e Topografia Ltda</b></div>
+      <div><span class="st-k">Serviços</span>Planialtimétrico, cadastral, aerolevantamento, batimetria, delimitação e usucapião</div>
+      <div><span class="st-k">Contato</span><span id="st-contato"><a href="#contato">Pedir orçamento</a></span></div>
+      <div><span class="st-k">Folha</span>01/01</div>
+      <div><span class="st-k">Data</span><span id="st-ano">2026</span></div>
+    </div>
+    <p class="copy">© <span id="ano">2026</span> Apoio Agrimensura e Topografia Ltda. Desde 2001.</p>
+  </div>
+</footer>
+
+<ol class="toaster" id="toaster" aria-live="polite"></ol>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* =========================================================
+     CONTATO DA EMPRESA: preencha aqui e tudo se ajusta sozinho
+     (lista de contatos, carimbo do rodapé e destino do formulário)
+     ========================================================= */
+  const CONTATO = {
+    whatsapp: '',   // só números com DDD, ex.: '11987654321'
+    telefone: '',   // como deve aparecer, ex.: '(11) 3456-7890'
+    email: '',      // ex.: 'contato@apoioagrimensura.com.br'
+    endereco: '',   // ex.: 'Rua Exemplo, 123, Centro, Cidade - SP'
+    instagram: ''   // só o usuário, sem @
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap = typeof window.gsap !== 'undefined';
+  const hasST = hasGsap && typeof window.ScrollTrigger !== 'undefined';
+  if (hasST) gsap.registerPlugin(ScrollTrigger);
+  const nf = (v, d = 2) => v.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  $('ano').textContent = $('st-ano').textContent = new Date().getFullYear();
+
+  /* ---------- A empresa: anos desde a fundação ---------- */
+  const FUND = 2001, NOW = new Date().getFullYear(), YRS = NOW - FUND;
+  $('yrs-num').textContent = YRS;
+  document.querySelectorAll('.yrs').forEach((n) => { n.textContent = YRS; });
+  (function yearsRuler() {
+    const r = $('years-ruler');
+    for (let y = FUND; y <= NOW; y++) {
+      const k = (y - FUND) / YRS * 100, major = (y - FUND) % 5 === 0 || y === NOW;
+      const t = document.createElement('span'); t.className = 'yr-tick' + (major ? ' major' : ''); t.style.left = k + '%'; r.append(t);
+      if (major && (y === NOW || NOW - y >= 3)) {
+        const l = document.createElement('span'); l.className = 'yr-lbl' + (y === FUND ? ' first' : y === NOW ? ' last' : ''); l.style.left = k + '%'; l.textContent = y; r.append(l);
+      }
+    }
+  })();
+
+  /* ---------- Ruído para gerar terrenos ---------- */
+  function makeNoise(seed) {
+    function hash(x, y) {
+      let h = Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(seed, 1442695041);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967295;
+    }
+    function noise(x, y) {
+      const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+      const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+      const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+      return (a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v) * 2 - 1;
+    }
+    return function fbm(x, y, oct = 4) {
+      let s = 0, amp = 0.5, f = 1, n = 0;
+      for (let i = 0; i < oct; i++) { s += amp * noise(x * f + i * 17.3, y * f - i * 9.1); n += amp; amp *= 0.5; f *= 2.03; }
+      return s / n;
+    };
+  }
+
+  /* ---------- Curvas de nível (marching squares) ---------- */
+  const EDGES = [[], [[3, 2]], [[2, 1]], [[3, 1]], [[0, 1]], [[3, 0], [2, 1]], [[0, 2]], [[3, 0]], [[3, 0]], [[0, 2]], [[0, 1], [3, 2]], [[0, 1]], [[3, 1]], [[2, 1]], [[3, 2]], []];
+  function contour(ctx, G, cols, rows, cs, L, labels) {
+    const stride = cols + 1;
+    let count = 0;
+    ctx.beginPath();
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const v0 = G[j * stride + i], v1 = G[j * stride + i + 1], v2 = G[(j + 1) * stride + i + 1], v3 = G[(j + 1) * stride + i];
+        const code = (v0 > L ? 8 : 0) | (v1 > L ? 4 : 0) | (v2 > L ? 2 : 0) | (v3 > L ? 1 : 0);
+        if (code === 0 || code === 15) continue;
+        for (const [ea, eb] of EDGES[code]) {
+          const pa = edgePt(ea, i, j, v0, v1, v2, v3, L), pb = edgePt(eb, i, j, v0, v1, v2, v3, L);
+          ctx.moveTo(pa[0] * cs, pa[1] * cs); ctx.lineTo(pb[0] * cs, pb[1] * cs);
+          count++;
+          if (labels && count % 160 === 80) labels.push({ x: (pa[0] + pb[0]) / 2 * cs, y: (pa[1] + pb[1]) / 2 * cs, a: Math.atan2(pb[1] - pa[1], pb[0] - pa[0]), L });
+        }
+      }
+    }
+    ctx.stroke();
+  }
+  function edgePt(e, i, j, v0, v1, v2, v3, L) {
+    switch (e) {
+      case 0: return [i + (L - v0) / (v1 - v0), j];
+      case 1: return [i + 1, j + (L - v1) / (v2 - v1)];
+      case 2: return [i + (L - v3) / (v2 - v3), j + 1];
+      default: return [i, j + (L - v0) / (v3 - v0)];
+    }
+  }
+  function drawLabels(ctx, labels, color, minGap, fmt) {
+    const placed = [];
+    ctx.font = '600 11px Archivo, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const l of labels) {
+      if (placed.some((p) => Math.hypot(p.x - l.x, p.y - l.y) < minGap)) continue;
+      placed.push(l);
+      let a = l.a; if (a > Math.PI / 2) a -= Math.PI; if (a < -Math.PI / 2) a += Math.PI;
+      ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(a);
+      const t = fmt(l.L), w = ctx.measureText(t).width + 8;
+      ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillRect(-w / 2, -7, w, 14);
+      ctx.fillStyle = color; ctx.fillText(t, 0, 0.5);
+      ctx.restore();
+    }
+  }
+
+  /* =========================================================
+     HERO: mapa topográfico com lago, leitura de cota e pontos
+     ========================================================= */
+  const hero = $('inicio'), map = $('map'), ov = $('map-ov');
+  const mctx = map.getContext('2d'), octx = ov.getContext('2d');
+  const off = document.createElement('canvas'), offx = off.getContext('2d');
+  const E0 = 312000, N0 = 7394000;
+  let W = 0, H = 0, DPR = 1, S = 0.4, Tz, lakeF, WL = 0, reveal = reduce ? 1 : 0, heroVisible = true;
+  const isMobile = () => W < 900;
+
+  function buildTerrain() {
+    const fbm = makeNoise(11);
+    const Wm = W * S, Hm = H * S;
+    const lake = isMobile() ? (W < 600 ? [0.8, 0.66, 0.16, 0.1] : [0.78, 0.7, 0.12, 0.08]) : [0.76, 0.62, 0.12, 0.085];
+    const hill = isMobile() ? [0.3, 0.3, 0.3] : [0.52, 0.2, 0.2];
+    lakeF = (x, y) => { const lx = (x - lake[0] * Wm) / (lake[2] * Wm), ly = (y - lake[1] * Hm) / (lake[3] * Wm); return Math.exp(-(lx * lx + ly * ly)); };
+    Tz = (x, y) => {
+      const hx = (x - hill[0] * Wm) / (hill[2] * Wm), hy = (y - hill[1] * Hm) / (hill[2] * Wm);
+      return 752 + fbm(x / 150, y / 150) * 10 + fbm(x / 40, y / 40, 2) * 1.4 + 34 * Math.exp(-(hx * hx + hy * hy)) - 28 * lakeF(x, y) - 6 * (y / Hm);
+    };
+    WL = Math.round((Tz(lake[0] * Wm, lake[1] * Hm) + 9) * 10) / 10;
+  }
+  const isWater = (xm, ym, z) => z < WL && lakeF(xm, ym) > 0.15;
+
+  function renderMap() {
+    const r = hero.getBoundingClientRect();
+    W = Math.round(r.width); H = Math.round(r.height);
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    S = isMobile() ? 0.62 : 0.42;
+    for (const c of [map, ov, off]) { c.width = W * DPR; c.height = H * DPR; }
+    buildTerrain();
+    const cs = isMobile() ? 7 : 6, cols = Math.ceil(W / cs), rows = Math.ceil(H / cs), stride = cols + 1;
+    const G = new Float32Array(stride * (rows + 1)), Gland = new Float32Array(G.length), Gw = new Float32Array(G.length);
+    const water = document.createElement('canvas'); water.width = stride; water.height = rows + 1;
+    const wctx = water.getContext('2d'), img = wctx.createImageData(stride, rows + 1);
+    let zmin = Infinity, zmax = -Infinity;
+    for (let j = 0; j <= rows; j++) for (let i = 0; i <= cols; i++) {
+      const xm = i * cs * S, ym = j * cs * S, z = Tz(xm, ym), k = j * stride + i;
+      G[k] = z; Gland[k] = Math.max(z, WL);
+      const lf = lakeF(xm, ym);
+      Gw[k] = lf > 0.15 ? z : WL + 10;
+      if (z > zmax) zmax = z; if (z < zmin) zmin = z;
+      if (z < WL && lf > 0.15) {
+        const d = Math.min(1, (WL - z) / 9);
+        img.data[k * 4] = 45; img.data[k * 4 + 1] = 106; img.data[k * 4 + 2] = 159; img.data[k * 4 + 3] = Math.round(40 + 110 * d);
+      }
+    }
+    wctx.putImageData(img, 0, 0);
+    offx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    offx.fillStyle = '#fff'; offx.fillRect(0, 0, W, H);
+    offx.imageSmoothingEnabled = true;
+    offx.drawImage(water, 0, 0, stride * cs, (rows + 1) * cs);
+    // curvas do terreno: a cada 2 m, mestras a cada 10 m
+    const labels = [];
+    offx.lineJoin = 'round';
+    for (let L = Math.ceil((WL + 0.5) / 2) * 2; L <= zmax; L += 2) {
+      const idx = L % 10 === 0;
+      offx.strokeStyle = idx ? 'rgba(228,71,42,.62)' : '#d2d2d2';
+      offx.lineWidth = idx ? 1.5 : 1;
+      contour(offx, Gland, cols, rows, cs, L, idx ? labels : null);
+    }
+    // margem e isóbatas
+    offx.strokeStyle = '#2d6a9f'; offx.lineWidth = 1.8;
+    contour(offx, Gw, cols, rows, cs, WL);
+    offx.setLineDash([3, 4]); offx.lineWidth = 1; offx.strokeStyle = 'rgba(45,106,159,.7)';
+    for (let d = 1; d <= 9; d++) contour(offx, Gw, cols, rows, cs, WL - d);
+    offx.setLineDash([]);
+    drawLabels(offx, labels.filter((l) => !(l.x < W * 0.55 && l.y < H * 0.8) || isMobile()), '#b3341c', 150, (L) => L + ' m');
+    blitMap();
+    setupSurvey();
+  }
+  function blitMap() {
+    mctx.setTransform(1, 0, 0, 1, 0, 0);
+    mctx.clearRect(0, 0, map.width, map.height);
+    const x = Math.round(map.width * reveal);
+    if (x > 0) mctx.drawImage(off, 0, 0, x, off.height, 0, 0, x, off.height);
+  }
+
+  /* Leitura das coordenadas */
+  const ro = { src: $('ro-src'), e: $('ro-e'), n: $('ro-n'), zk: $('ro-zk'), z: $('ro-z') };
+  function readAt(px, py, label) {
+    const xm = px * S, ym = py * S, z = Tz(xm, ym);
+    const wet = isWater(xm, ym, z);
+    ro.src.textContent = label;
+    ro.e.textContent = nf(E0 + xm) + ' m';
+    ro.n.textContent = nf(N0 + (H * S - ym)) + ' m';
+    ro.zk.textContent = wet ? 'Profundidade' : 'Cota';
+    ro.z.textContent = (wet ? nf(WL - z, 1) : nf(z, 2)) + ' m';
+    return { z, wet };
+  }
+  function flash() { for (const k of ['e', 'n', 'z']) { ro[k].classList.remove('flash'); void ro[k].offsetWidth; ro[k].classList.add('flash'); } }
+
+  /* Estação total medindo pontos sozinha */
+  let station = { x: 0, y: 0 }, shots = [], lastShot = 0, pointer = null, shotCount = 0;
+  function setupSurvey() {
+    station = isMobile() ? { x: W * 0.9, y: H - 150 } : { x: W * 0.6, y: H * 0.86 };
+    shots = [];
+  }
+  function newShot(now) {
+    let x, y, tries = 0;
+    do {
+      x = isMobile() ? W * (0.06 + Math.random() * 0.88) : W * (0.5 + Math.random() * 0.46);
+      y = isMobile() ? H * 0.6 + Math.random() * (H * 0.4 - 160) : H * (0.12 + Math.random() * 0.7);
+      tries++;
+    } while (tries < 10 && Math.hypot(x - station.x, y - station.y) < 90);
+    const xm = x * S, ym = y * S, z = Tz(xm, ym), wet = isWater(xm, ym, z);
+    shots.push({ x, y, t: now, txt: wet ? '−' + nf(WL - z, 1) : nf(z, 2), wet, read: false });
+    if (shots.length > 9) shots.shift();
+    shotCount++;
+  }
+  function drawOverlay(now) {
+    octx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    octx.clearRect(0, 0, W, H);
+    if (reveal < 1) {
+      const sx = W * reveal;
+      const g = octx.createLinearGradient(sx - 90, 0, sx, 0);
+      g.addColorStop(0, 'rgba(228,71,42,0)'); g.addColorStop(1, 'rgba(228,71,42,.28)');
+      octx.fillStyle = g; octx.fillRect(sx - 90, 0, 90, H);
+      octx.fillStyle = '#e4472a'; octx.fillRect(sx - 1, 0, 2, H);
+      return;
+    }
+    if (!reduce && now - lastShot > 1700) { newShot(now); lastShot = now; }
+    octx.font = '700 11px Archivo, sans-serif'; octx.textBaseline = 'middle'; octx.textAlign = 'left';
+    for (const s of shots) {
+      const age = now - s.t, k = clamp(age / 420, 0, 1), fade = clamp(1 - (shots.length - 1 - shots.indexOf(s)) / 9, 0.15, 1);
+      if (k < 1) {
+        octx.strokeStyle = 'rgba(228,71,42,.9)'; octx.lineWidth = 1.4;
+        octx.beginPath(); octx.moveTo(station.x, station.y - 16);
+        octx.lineTo(station.x + (s.x - station.x) * k, station.y - 16 + (s.y - station.y + 16) * k); octx.stroke();
+        continue;
+      }
+      if (!s.read) { s.read = true; if (!pointer) { readAt(s.x, s.y, 'Último ponto medido'); flash(); } }
+      const pop = clamp((age - 420) / 260, 0, 1), sc = 1 + 0.6 * (1 - pop);
+      octx.globalAlpha = fade;
+      octx.strokeStyle = s.wet ? '#2d6a9f' : '#000'; octx.lineWidth = 1.6;
+      octx.beginPath(); octx.moveTo(s.x - 6 * sc, s.y); octx.lineTo(s.x + 6 * sc, s.y); octx.moveTo(s.x, s.y - 6 * sc); octx.lineTo(s.x, s.y + 6 * sc); octx.stroke();
+      octx.beginPath(); octx.arc(s.x, s.y, 3.2, 0, Math.PI * 2); octx.fillStyle = s.wet ? '#2d6a9f' : '#e4472a'; octx.fill();
+      const tw = octx.measureText(s.txt).width + 8;
+      octx.fillStyle = 'rgba(255,255,255,.92)'; octx.fillRect(s.x + 8, s.y - 17, tw, 15);
+      octx.fillStyle = s.wet ? '#2d6a9f' : '#000'; octx.fillText(s.txt, s.x + 12, s.y - 9);
+      octx.globalAlpha = 1;
+    }
+    // estação total
+    octx.strokeStyle = '#000'; octx.lineWidth = 2;
+    octx.beginPath();
+    octx.moveTo(station.x, station.y - 12); octx.lineTo(station.x - 11, station.y + 14);
+    octx.moveTo(station.x, station.y - 12); octx.lineTo(station.x + 11, station.y + 14);
+    octx.moveTo(station.x, station.y - 12); octx.lineTo(station.x, station.y + 14); octx.stroke();
+    octx.fillStyle = '#e4472a'; octx.fillRect(station.x - 8, station.y - 25, 16, 13); octx.strokeRect(station.x - 8, station.y - 25, 16, 13);
+    // mira do cursor
+    if (pointer) {
+      const { x, y } = pointer;
+      octx.strokeStyle = 'rgba(0,0,0,.55)'; octx.lineWidth = 1; octx.setLineDash([4, 5]);
+      octx.beginPath(); octx.moveTo(0, y); octx.lineTo(W, y); octx.moveTo(x, 0); octx.lineTo(x, H); octx.stroke();
+      octx.setLineDash([]);
+      octx.strokeStyle = '#000'; octx.lineWidth = 1.6;
+      octx.beginPath(); octx.arc(x, y, 14, 0, Math.PI * 2); octx.stroke();
+      octx.beginPath(); octx.arc(x, y, 2.5, 0, Math.PI * 2); octx.fillStyle = '#e4472a'; octx.fill();
+    }
+  }
+  let touchTimer = 0;
+  function onPoint(e, label) {
+    const r = hero.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    if (x < 0 || y < 0 || x > W || y > H || reveal < 1) return;
+    pointer = { x, y };
+    readAt(x, y, label);
+    if (reduce) drawOverlay(performance.now());
+  }
+  hero.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') onPoint(e, 'Ponto sob o cursor'); });
+  hero.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' || e.target.closest('a, button, .readout')) return;
+    onPoint(e, 'Ponto tocado'); flash();
+    clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => { pointer = null; ro.src.textContent = 'Último ponto medido'; if (reduce) drawOverlay(performance.now()); }, 5000);
+  });
+  hero.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { pointer = null; ro.src.textContent = 'Último ponto medido'; if (reduce) drawOverlay(performance.now()); } });
+  if (matchMedia('(hover: none)').matches) $('ro-hint').textContent = 'Toque no mapa para ler a cota de qualquer ponto. Mapa ilustrativo.';
+
+  /* =========================================================
+     ILUSTRAÇÕES DOS SERVIÇOS (uma linha do tempo GSAP cada)
+     ========================================================= */
+  const drawable = (sel, root) => root.querySelectorAll(sel).forEach((p) => { p.setAttribute('pathLength', '1'); p.style.strokeDasharray = '1'; p.style.strokeDashoffset = '1'; });
+  const ILL = {};
+
+  ILL.plani = (svg) => {
+    const g = svg.querySelector('.i-pts'); g.innerHTML = '';
+    const st = { x: 452, y: 296 };
+    const P = [[78, 58, '741,82'], [398, 46, '744,10'], [420, 274, '738,95'], [100, 290, '737,40'], [175, 118, '742,60'], [295, 200, '741,15'], [360, 95, '743,30'], [232, 252, '739,70']];
+    const items = P.map(([x, y, t]) => {
+      const ln = el('line', { x1: st.x, y1: st.y, x2: x, y2: y, stroke: '#e4472a', 'stroke-width': 1.4, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1 }, g);
+      const c = el('g', { transform: `translate(${x} ${y})` }, g);
+      const dot = el('circle', { r: 4, fill: '#e4472a', stroke: '#000', 'stroke-width': 1.2 }, c);
+      const tx = el('text', { x: 8, y: -7, class: 'i-txt' }, c); tx.textContent = t;
+      return { ln, dot, tx };
+    });
+    drawable('.i-contours path, .i-lot', svg);
+    const tl = gsap.timeline();
+    tl.to(svg.querySelector('.i-lot'), { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' })
+      .to(svg.querySelectorAll('.i-contours path'), { strokeDashoffset: 0, duration: 0.9, stagger: 0.1, ease: 'power1.inOut' }, 0.3)
+      .from(svg.querySelectorAll('.i-house, .i-tree, .i-txt.s'), { opacity: 0, duration: 0.5, stagger: 0.08 }, 0.7)
+      .from(svg.querySelector('.i-station'), { y: 20, opacity: 0, duration: 0.5, ease: 'back.out(2)' }, 0.8);
+    items.forEach((it, i) => {
+      const t0 = 1.3 + i * 0.42;
+      tl.to(it.ln, { strokeDashoffset: 0, duration: 0.28, ease: 'none' }, t0)
+        .from(it.dot, { scale: 0, transformOrigin: 'center', duration: 0.3, ease: 'back.out(3)' }, t0 + 0.26)
+        .from(it.tx, { opacity: 0, x: -4, duration: 0.3 }, t0 + 0.3)
+        .to(it.ln, { opacity: 0, duration: 0.4 }, t0 + 0.5);
+    });
+    return tl;
+  };
+
+  ILL.cad = (svg) => {
+    const vD = svg.querySelector('.v-depth'), vO = svg.querySelector('.v-diam'), vF = svg.querySelector('.v-fundo');
+    const o = { d: 0, o: 0 };
+    vD.textContent = '0,00'; vO.textContent = '0'; vF.textContent = '742,18';
+    gsap.set(svg.querySelector('.i-lid'), { x: 0, y: 0, rotation: 0 });
+    const tl = gsap.timeline();
+    tl.from(svg.querySelectorAll('.i-lbl-t'), { opacity: 0, y: -6, duration: 0.4 })
+      .to(svg.querySelector('.i-lid'), { y: -40, duration: 0.5, ease: 'power2.out' }, 0.3)
+      .to(svg.querySelector('.i-lid'), { x: 150, y: -10, rotation: 6, transformOrigin: 'center', duration: 0.6, ease: 'power2.inOut' }, 0.75)
+      .from(svg.querySelector('.i-tape'), { scaleY: 0, transformOrigin: '50% 0%', duration: 1.1, ease: 'power2.inOut' }, 1.3)
+      .from(svg.querySelectorAll('.i-dimd, .i-lbl-d, .i-lbl-f'), { opacity: 0, duration: 0.4, stagger: 0.1 }, 1.3)
+      .to(o, { d: 2.35, duration: 1.1, ease: 'power2.inOut', onUpdate: () => { vD.textContent = nf(o.d); vF.textContent = nf(742.18 - o.d); } }, 1.3)
+      .from(svg.querySelectorAll('.i-dimo, .i-lbl-o'), { opacity: 0, duration: 0.4 }, 2.5)
+      .to(o, { o: 600, duration: 0.9, ease: 'power2.out', onUpdate: () => { vO.textContent = Math.round(o.o); } }, 2.5);
+    return tl;
+  };
+
+  ILL.aero = (svg) => {
+    const pts = [[50, 50], [430, 50], [430, 115], [50, 115], [50, 180], [430, 180], [430, 245], [50, 245], [50, 310], [430, 310]];
+    const segs = []; let total = 0;
+    for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segs.push({ a: pts[i - 1], b: pts[i], s: total, l }); total += l; }
+    const at = (d) => { const s = segs.find((g) => d <= g.s + g.l) || segs[segs.length - 1]; const k = (d - s.s) / s.l; return [s.a[0] + (s.b[0] - s.a[0]) * k, s.a[1] + (s.b[1] - s.a[1]) * k]; };
+    const foot = svg.querySelector('.i-foot'); foot.innerHTML = '';
+    const shots = [];
+    segs.forEach((s) => {
+      if (s.a[1] !== s.b[1]) return; // fotos só nas faixas
+      const n = Math.floor(s.l / 52);
+      for (let i = 0; i <= n; i++) {
+        const d = s.s + (i / n) * s.l, [x, y] = at(d);
+        shots.push({ d, r: el('rect', { x: x - 34, y: y - 26, width: 68, height: 52, fill: 'rgba(228,71,42,.10)', stroke: 'rgba(228,71,42,.6)', 'stroke-width': 1, opacity: 0 }, foot) });
+      }
+    });
+    const path = svg.querySelector('.i-path'); path.setAttribute('pathLength', '1'); path.style.strokeDasharray = '1'; path.style.strokeDashoffset = '1';
+    const drone = svg.querySelector('.i-drone'), ortho = svg.querySelector('.i-ortho'), done = svg.querySelector('.i-done');
+    svg.querySelector('.v-fotos').textContent = shots.length + ' fotos com sobreposição';
+    const o = { d: 0 };
+    const place = () => {
+      const [x, y] = at(o.d);
+      drone.setAttribute('transform', `translate(${x} ${y})`);
+      path.style.strokeDashoffset = 1 - o.d / total;
+      for (const s of shots) if (!s.on && s.d <= o.d) { s.on = true; gsap.fromTo(s.r, { opacity: 1, scale: 1.15, transformOrigin: 'center' }, { opacity: 0.85, scale: 1, duration: 0.4 }); }
+    };
+    gsap.set(ortho, { opacity: 0.35, filter: 'grayscale(1)' }); gsap.set(done, { opacity: 0 }); gsap.set([foot, path], { opacity: 1 });
+    place();
+    const tl = gsap.timeline();
+    tl.to(o, { d: total, duration: 5.2, ease: 'none', onUpdate: place })
+      .to(foot, { opacity: 0, duration: 0.6 }, '+=0.2')
+      .to(path, { opacity: 0.25, duration: 0.6 }, '<')
+      .to(ortho, { opacity: 1, filter: 'grayscale(0)', duration: 0.8 }, '<')
+      .to(done, { opacity: 1, duration: 0.4 }, '-=0.2');
+    return tl;
+  };
+
+  ILL.bat = (svg) => {
+    const X0 = 30, X1 = 450, WY = 100, PPM = 30, POLE = 8;
+    // pontos medidos com o bastão (margem, 8 pontos no fundo, margem)
+    const XS = [62, 112, 162, 212, 262, 312, 362, 412];
+    const depthAt = (x) => { const t = (x - X0) / (X1 - X0), s = Math.sin(Math.PI * t); return 178 * Math.pow(s, 0.85) * (1 - 0.2 * Math.exp(-(((x - 335) / 40) ** 2))); };
+    const P = [[X0, WY], ...XS.map((x) => [x + POLE, Math.round((WY + depthAt(x + POLE)) * 10) / 10]), [X1, WY]];
+    // o fundo desenhado é uma curva suave que passa exatamente pelos pontos
+    let curve = '';
+    for (let i = 0; i < P.length - 1; i++) {
+      const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      curve += `C${c1[0].toFixed(1)} ${Math.max(WY, c1[1]).toFixed(1)} ${c2[0].toFixed(1)} ${Math.max(WY, c2[1]).toFixed(1)} ${p2[0]} ${p2[1]}`;
+    }
+    svg.querySelector('.bat-ground').setAttribute('d', `M0 92L${X0} ${WY}${curve}L480 92V340H0Z`);
+    svg.querySelector('.bat-water').setAttribute('d', `M${X0} ${WY}${curve}Z`);
+    svg.querySelector('.bat-unknown').setAttribute('d', `M${X0} ${WY}${curve}`);
+    svg.querySelector('.bat-known').setAttribute('d', `M${X0} ${WY}${curve}`);
+    const rig = svg.querySelector('.bat-rig'), pole = svg.querySelector('.bat-pole'), lbl = svg.querySelector('.bat-lbl'), v = svg.querySelector('.v-depth2'), clipR = svg.querySelector('.bat-clip-r');
+    const pts = svg.querySelector('.bat-pts'); pts.innerHTML = '';
+    const dots = XS.map((x, i) => el('circle', { cx: P[i + 1][0], cy: P[i + 1][1], r: 4.2, fill: '#e4472a', stroke: '#000', 'stroke-width': 1.2, opacity: 0 }, pts));
+    const o = { x: 34 }, dv = { v: 0 };
+    const place = () => {
+      rig.setAttribute('transform', `translate(${o.x} ${WY})`);
+      lbl.setAttribute('transform', `translate(${clamp(o.x + 64, 64, 424)} ${WY + Math.max(34, depthAt(o.x + POLE) / 2 + 10)})`);
+    };
+    pole.setAttribute('y2', 4); clipR.setAttribute('width', X0); v.textContent = '0,0'; place();
+    const tl = gsap.timeline();
+    tl.from([rig, lbl], { opacity: 0, duration: 0.4 });
+    XS.forEach((x, i) => {
+      const d = P[i + 1][1] - WY;
+      tl.to(o, { x, duration: 0.34, ease: 'power1.inOut', onUpdate: place })
+        .to(pole, { attr: { y2: d }, duration: 0.24, ease: 'power2.in' })
+        .fromTo(dots[i], { opacity: 0, scale: 2.2, transformOrigin: 'center' }, { opacity: 1, scale: 1, duration: 0.2, ease: 'back.out(2)' })
+        .to(dv, { v: d / PPM, duration: 0.2, onUpdate: () => { v.textContent = nf(dv.v, 1); } }, '<')
+        .to(clipR, { attr: { width: P[i + 1][0] }, duration: 0.25, ease: 'none' }, '<')
+        .to(pole, { attr: { y2: 4 }, duration: 0.18, ease: 'power2.out' }, '+=0.08');
+    });
+    tl.to(o, { x: 426, duration: 0.4, ease: 'power1.inOut', onUpdate: place })
+      .to(clipR, { attr: { width: 480 }, duration: 0.3, ease: 'none' }, '<')
+      .to(lbl, { opacity: 0, duration: 0.3 }, '<');
+    return tl;
+  };
+
+  ILL.del = (svg) => {
+    const V = [[95, 62], [392, 50], [410, 280], [80, 290]], SC = 0.1;
+    const edges = svg.querySelector('.del-edges'), lbls = svg.querySelector('.del-lbls'), marks = svg.querySelector('.del-marks');
+    edges.innerHTML = lbls.innerHTML = marks.innerHTML = '';
+    svg.querySelector('.del-fill').setAttribute('points', V.map((p) => p.join(',')).join(' '));
+    let area = 0;
+    V.forEach((p, i) => { const q = V[(i + 1) % V.length]; area += p[0] * q[1] - q[0] * p[1]; });
+    area = Math.abs(area) / 2 * SC * SC;
+    const E = V.map((p, i) => {
+      const q = V[(i + 1) % V.length], len = Math.hypot(q[0] - p[0], q[1] - p[1]) * SC;
+      const ln = el('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1 }, edges);
+      const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+      let a = Math.atan2(q[1] - p[1], q[0] - p[0]) * 180 / Math.PI; if (a > 90) a -= 180; if (a < -90) a += 180;
+      const nx = -(q[1] - p[1]), ny = q[0] - p[0], nl = Math.hypot(nx, ny), cx = (V[0][0] + V[2][0]) / 2, cy = (V[0][1] + V[2][1]) / 2;
+      const sgn = ((mx - cx) * nx + (my - cy) * ny) > 0 ? 1 : -1;
+      const tx = el('text', { class: 'i-txt b', x: 0, y: 0, 'text-anchor': 'middle', transform: `translate(${mx + sgn * nx / nl * 16} ${my + sgn * ny / nl * 16 + 4}) rotate(${a})` }, lbls);
+      tx.textContent = nf(len) + ' m';
+      return { ln, tx };
+    });
+    const M = V.map((p, i) => {
+      const g = el('g', { transform: `translate(${p[0]} ${p[1]})` }, marks);
+      el('rect', { x: -6, y: -6, width: 12, height: 12, fill: '#e4472a', stroke: '#000', 'stroke-width': 1.5 }, g);
+      const t = el('text', { class: 'i-txt b', x: i === 1 || i === 2 ? 10 : -10, y: i < 2 ? -9 : 20, 'text-anchor': i === 1 || i === 2 ? 'start' : 'end' }, g);
+      t.textContent = 'V' + (i + 1);
+      return g;
+    });
+    const va = svg.querySelector('.v-area'), o = { a: 0 };
+    va.textContent = '0,00';
+    const tl = gsap.timeline();
+    tl.from(M, { y: '-=26', opacity: 0, duration: 0.5, stagger: 0.18, ease: 'bounce.out' });
+    E.forEach((e, i) => { tl.to(e.ln, { strokeDashoffset: 0, duration: 0.45, ease: 'power1.inOut' }, 0.9 + i * 0.45).from(e.tx, { opacity: 0, duration: 0.3 }, 1.15 + i * 0.45); });
+    tl.from(svg.querySelector('.del-fill'), { opacity: 0, duration: 0.6 }, 2.8)
+      .from(svg.querySelector('.del-area'), { opacity: 0, y: 6, duration: 0.4 }, 2.8)
+      .to(o, { a: area, duration: 1, ease: 'power2.out', onUpdate: () => { va.textContent = nf(o.a); } }, 2.8);
+    return tl;
+  };
+
+  ILL.usu = (svg) => {
+    drawable('.usu-lot, .usu-sign', svg);
+    const tl = gsap.timeline();
+    tl.from(svg.querySelector('.usu-sheet'), { y: 20, opacity: 0, duration: 0.5, ease: 'power2.out' })
+      .to(svg.querySelector('.usu-lot'), { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 0.4)
+      .from(svg.querySelectorAll('.usu-v rect'), { scale: 0, transformOrigin: 'center', duration: 0.3, stagger: 0.12, ease: 'back.out(3)' }, 0.9)
+      .from(svg.querySelectorAll('.usu-lines rect'), { scaleX: 0, transformOrigin: '0% 50%', duration: 0.45, stagger: 0.22, ease: 'none' }, 1.4)
+      .to(svg.querySelector('.usu-sign'), { strokeDashoffset: 0, duration: 0.8, ease: 'power1.inOut' }, 3)
+      .from(svg.querySelector('.usu-stamp'), { scale: 2.2, opacity: 0, rotation: -25, transformOrigin: 'center', duration: 0.45, ease: 'back.out(1.6)' }, 3.6)
+      .from(svg.querySelectorAll('.usu-call'), { opacity: 0, duration: 0.5, stagger: 0.15 }, 1);
+    return tl;
+  };
+
+  /* Abas (padrão shadcn/Radix) */
+  const tabs = [...document.querySelectorAll('#svc-tabs [role="tab"]')];
+  let current = null, svcSeen = false;
+  function playIll(key) {
+    if (current) { current.progress(1).kill(); current = null; }
+    const svg = $('ill-' + key);
+    if (!hasGsap) return;
+    current = ILL[key](svg);
+    if (reduce) current.progress(1);
+  }
+  function selectTab(btn, focus) {
+    tabs.forEach((t) => {
+      const on = t === btn;
+      t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+      const p = $(t.getAttribute('aria-controls'));
+      p.hidden = !on; p.dataset.state = on ? 'active' : 'inactive';
+    });
+    if (focus) btn.focus();
+    if (svcSeen) playIll(btn.dataset.ill);
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => { if (t.getAttribute('aria-selected') !== 'true') selectTab(t); });
+    t.addEventListener('keydown', (e) => {
+      const j = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault(); selectTab(tabs[(j + tabs.length) % tabs.length], true);
+    });
+  });
+  document.querySelectorAll('.replay').forEach((b) => b.addEventListener('click', () => {
+    const t = tabs.find((x) => x.getAttribute('aria-selected') === 'true'); playIll(t.dataset.ill);
+  }));
+
+  /* =========================================================
+     COMPARADOR: modelo do terreno x curvas de nível
+     ========================================================= */
+  const cmp = $('compare'), ca = $('cmp-a'), cb = $('cmp-b'), range = $('cmp-range');
+  let cmpStats = null, cmpDrawn = false;
+  function renderCompare() {
+    const w = ca.clientWidth, h = ca.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (!w || !h) return;
+    for (const c of [ca, cb]) { c.width = w * dpr; c.height = h * dpr; }
+    const fbm = makeNoise(29);
+    const Wm = 640, Hm = Wm * h / w, s = Wm / w;
+    const Z = (x, y) => {
+      const r1 = Math.exp(-(((x - Wm * 0.28) / 130) ** 2 + ((y - Hm * 0.38) / 105) ** 2));
+      const r2 = Math.exp(-(((x - Wm * 0.74) / 150) ** 2 + ((y - Hm * 0.62) / 120) ** 2));
+      const valley = Math.exp(-(((y - Hm * 0.78 + 0.18 * (x - Wm / 2) - 22 * Math.sin(x / 70)) / 30) ** 2));
+      return 690 + 30 * r1 + 38 * r2 - 8 * valley + 6 * fbm(x / 170, y / 170, 3);
+    };
+    const step = 2, cols = Math.ceil(w / step), rows = Math.ceil(h / step), stride = cols + 1;
+    const G = new Float32Array(stride * (rows + 1));
+    let mn = Infinity, mx = -Infinity;
+    const D = new Float32Array(stride * (rows + 1)), fineN = makeNoise(83);
+    for (let j = 0; j <= rows; j++) for (let i = 0; i <= cols; i++) { const x = i * step * s, y = j * step * s, z = Z(x, y), k = j * stride + i; G[k] = z; D[k] = z + 1.6 * fineN(x / 26, y / 26, 3) + 0.35 * fineN(x / 7, y / 7, 2); if (z < mn) mn = z; if (z > mx) mx = z; }
+    // A: hipsometria + sombreamento
+    const tmp = document.createElement('canvas'); tmp.width = stride; tmp.height = rows + 1;
+    const tctx = tmp.getContext('2d'), img = tctx.createImageData(stride, rows + 1);
+    const ramp = [[0, [96, 148, 102]], [0.25, [150, 186, 112]], [0.5, [222, 212, 146]], [0.75, [214, 168, 112]], [1, [178, 126, 94]]];
+    const col = (t) => { for (let k = 1; k < ramp.length; k++) if (t <= ramp[k][0]) { const [t0, c0] = ramp[k - 1], [t1, c1] = ramp[k], f = (t - t0) / (t1 - t0); return c0.map((c, n) => c + (c1[n] - c) * f); } return ramp[ramp.length - 1][1]; };
+    const lx = -0.6, ly = -0.6, lz = 0.53;
+    for (let j = 0; j <= rows; j++) for (let i = 0; i <= cols; i++) {
+      const k = j * stride + i;
+      const zx = (D[j * stride + Math.min(cols, i + 1)] - D[j * stride + Math.max(0, i - 1)]) / (2 * step * s);
+      const zy = (D[Math.min(rows, j + 1) * stride + i] - D[Math.max(0, j - 1) * stride + i]) / (2 * step * s);
+      const nl = Math.hypot(zx * 4, zy * 4, 1), shade = clamp((-zx * 4 * lx - zy * 4 * ly + lz) / nl, 0, 1);
+      const c = col((G[k] - mn) / (mx - mn)), f = 0.6 + 0.6 * shade;
+      img.data[k * 4] = clamp(c[0] * f, 0, 255); img.data[k * 4 + 1] = clamp(c[1] * f, 0, 255); img.data[k * 4 + 2] = clamp(c[2] * f, 0, 255); img.data[k * 4 + 3] = 255;
+    }
+    tctx.putImageData(img, 0, 0);
+    const ax = ca.getContext('2d'); ax.setTransform(dpr, 0, 0, dpr, 0, 0); ax.imageSmoothingEnabled = true;
+    ax.drawImage(tmp, 0, 0, stride * step, (rows + 1) * step);
+    // B: curvas
+    const bx = cb.getContext('2d'); bx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bx.fillStyle = '#fff'; bx.fillRect(0, 0, w, h);
+    bx.strokeStyle = '#f0f0f0'; bx.lineWidth = 1; bx.beginPath();
+    for (let x = 0; x < w; x += 50) { bx.moveTo(x + 0.5, 0); bx.lineTo(x + 0.5, h); }
+    for (let y = 0; y < h; y += 50) { bx.moveTo(0, y + 0.5); bx.lineTo(w, y + 0.5); }
+    bx.stroke();
+    const labels = [];
+    for (let L = Math.ceil(mn); L <= mx; L++) {
+      const idx = L % 5 === 0;
+      bx.strokeStyle = idx ? '#e4472a' : '#a8a8a8'; bx.lineWidth = idx ? 1.7 : 0.9;
+      contour(bx, G, cols, rows, step, L, idx ? labels : null);
+    }
+    drawLabels(bx, labels, '#b3341c', 110, (L) => L + '');
+    cmpStats = { area: (Wm * Hm) / 10000, min: mn, max: mx, dz: mx - mn };
+    cmpDrawn = true;
+  }
+  const setSplit = (v) => { cmp.style.setProperty('--split', v); range.value = Math.round(v); };
+  range.addEventListener('input', () => { stopSweep(); setSplit(+range.value); });
+  let sweepTl = null;
+  const stopSweep = () => { if (sweepTl) { sweepTl.kill(); sweepTl = null; gsap.set('#scan', { opacity: 0 }); } };
+  function sweep() {
+    if (!hasGsap || reduce) return;
+    stopSweep();
+    const s = { v: +range.value };
+    sweepTl = gsap.timeline()
+      .set('#scan', { opacity: 1 })
+      .fromTo('#scan', { left: '-80px' }, { left: '100%', duration: 1.5, ease: 'power1.inOut' })
+      .set('#scan', { opacity: 0 })
+      .to(s, { v: 14, duration: 0.9, ease: 'power2.inOut', onUpdate: () => setSplit(s.v) }, 0.2)
+      .to(s, { v: 86, duration: 1.3, ease: 'power2.inOut', onUpdate: () => setSplit(s.v) })
+      .to(s, { v: 50, duration: 0.8, ease: 'power2.out', onUpdate: () => setSplit(s.v) });
+  }
+  function countSpecs() {
+    if (!cmpStats) return;
+    const set = [['sp-area', cmpStats.area, 1], ['sp-min', cmpStats.min, 1], ['sp-max', cmpStats.max, 1], ['sp-dz', cmpStats.dz, 1]];
+    set.forEach(([id, to, d], i) => {
+      const n = $(id);
+      if (!hasGsap || reduce) { n.textContent = nf(to, d); return; }
+      const o = { v: 0 };
+      gsap.to(o, { v: to, duration: 1.6, delay: i * 0.1, ease: 'power2.out', onUpdate: () => { n.textContent = nf(o.v, d); } });
+    });
+  }
+
+  /* =========================================================
+     MEMORIAL DESCRITIVO INTERATIVO
+     ========================================================= */
+  const msvg = $('memo-svg'), mpoly = $('memo-poly'), medges = $('memo-edges'), mvtx = $('memo-vtx');
+  const MSC = 0.125, ME0 = 312120, MN0 = 7394180; // 1 unidade = 0,125 m
+  const START = [[86, 70], [300, 52], [332, 214], [190, 250], [70, 196]];
+  let MV = START.map((p) => p.slice()), memoTyped = false, typing = null;
+  (function grid() { const g = $('memo-grid'); for (let x = 0; x <= 400; x += 40) el('path', { d: `M${x} 0V300` }, g); for (let y = 0; y <= 300; y += 40) el('path', { d: `M0 ${y}H400` }, g); })();
+  const toEN = ([x, y]) => [ME0 + x * MSC, MN0 + (300 - y) * MSC];
+  function dms(az) {
+    let d = Math.floor(az), mf = (az - d) * 60, m = Math.floor(mf), s = Math.round((mf - m) * 60);
+    if (s === 60) { s = 0; m++; } if (m === 60) { m = 0; d++; }
+    return `${d}°${String(m).padStart(2, '0')}'${String(s).padStart(2, '0')}"`;
+  }
+  function memoCalc() {
+    const P = MV.map(toEN), n = P.length;
+    let a = 0, per = 0; const segs = [];
+    for (let i = 0; i < n; i++) {
+      const p = P[i], q = P[(i + 1) % n], dE = q[0] - p[0], dN = q[1] - p[1];
+      a += p[0] * q[1] - q[0] * p[1];
+      const dist = Math.hypot(dE, dN); per += dist;
+      let az = Math.atan2(dE, dN) * 180 / Math.PI; if (az < 0) az += 360;
+      segs.push({ dist, az });
+    }
+    return { P, area: Math.abs(a) / 2, per, segs };
+  }
+  function memoText(c) {
+    const v = (i) => `V${i + 1}`, co = (p) => `N ${nf(p[1])} m e E ${nf(p[0])} m`;
+    let t = `Inicia-se a descrição deste perímetro no vértice ${v(0)}, de coordenadas ${co(c.P[0])}; `;
+    c.segs.forEach((s, i) => {
+      const j = (i + 1) % c.P.length;
+      t += `deste, segue com azimute de ${dms(s.az)} e distância de ${nf(s.dist)} m até o vértice ${v(j)}`;
+      t += j === 0 ? `, ponto inicial da descrição deste perímetro, que encerra uma área de ${nf(c.area)} m².` : `, de coordenadas ${co(c.P[j])}; `;
+    });
+    return t;
+  }
+  const vtxEls = MV.map((p, i) => {
+    const g = el('g', { class: 'vtx', tabindex: 0, role: 'button', 'aria-label': `Vértice V${i + 1}. Use as setas para mover.` }, mvtx);
+    el('circle', { class: 'hit', r: 20 }, g);
+    el('circle', { class: 'ring', r: 11, fill: 'none', stroke: 'transparent' }, g);
+    el('rect', { class: 'mk', x: -6, y: -6, width: 12, height: 12 }, g);
+    const t = el('text', { class: 'i-txt b', x: 0, y: -14, 'text-anchor': 'middle' }, g); t.textContent = 'V' + (i + 1);
+    return g;
+  });
+  const edgeTx = MV.map(() => el('text', { class: 'i-txt', 'text-anchor': 'middle' }, medges));
+  function memoDraw(updateText = true) {
+    mpoly.setAttribute('points', MV.map((p) => p.join(',')).join(' '));
+    MV.forEach((p, i) => vtxEls[i].setAttribute('transform', `translate(${p[0]} ${p[1]})`));
+    const c = memoCalc();
+    let cx = 0, cy = 0; MV.forEach((p) => { cx += p[0] / MV.length; cy += p[1] / MV.length; });
+    MV.forEach((p, i) => {
+      const q = MV[(i + 1) % MV.length], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+      let a = Math.atan2(q[1] - p[1], q[0] - p[0]) * 180 / Math.PI; if (a > 90) a -= 180; if (a < -90) a += 180;
+      const nx = -(q[1] - p[1]), ny = q[0] - p[0], nl = Math.hypot(nx, ny) || 1, sgn = ((mx - cx) * nx + (my - cy) * ny) > 0 ? 1 : -1;
+      edgeTx[i].setAttribute('transform', `translate(${mx + sgn * nx / nl * 13} ${my + sgn * ny / nl * 13 + 4}) rotate(${a})`);
+      edgeTx[i].textContent = nf(c.segs[i].dist) + ' m';
+    });
+    $('m-area').textContent = nf(c.area) + ' m²';
+    $('m-per').textContent = nf(c.per) + ' m';
+    if (updateText && memoTyped) { if (typing) { typing.kill(); typing = null; } $('m-text').textContent = memoText(c); }
+    return c;
+  }
+  function typeMemo() {
+    memoTyped = true;
+    const full = memoText(memoCalc()), p = $('m-text');
+    if (!hasGsap || reduce) { p.textContent = full; return; }
+    const o = { n: 0 };
+    typing = gsap.to(o, {
+      n: full.length, duration: 4.5, ease: 'none',
+      onUpdate: () => { p.innerHTML = ''; p.append(full.slice(0, Math.round(o.n))); const c = document.createElement('span'); c.className = 'caret'; p.append(c); },
+      onComplete: () => { p.textContent = full; typing = null; }
+    });
+  }
+  // arrastar
+  let drag = null;
+  const svgPt = (e) => { const r = msvg.getBoundingClientRect(); return [(e.clientX - r.left) * 400 / r.width, (e.clientY - r.top) * 300 / r.height]; };
+  vtxEls.forEach((g, i) => {
+    g.addEventListener('pointerdown', (e) => { e.preventDefault(); drag = i; g.classList.add('drag'); g.setPointerCapture(e.pointerId); if (!memoTyped) typeMemo(); });
+    g.addEventListener('pointermove', (e) => { if (drag !== i) return; const [x, y] = svgPt(e); MV[i] = [clamp(Math.round(x), 12, 388), clamp(Math.round(y), 22, 270)]; memoDraw(); });
+    const end = () => { drag = null; g.classList.remove('drag'); };
+    g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+    g.addEventListener('keydown', (e) => {
+      const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+      if (!d) return;
+      e.preventDefault(); const st = e.shiftKey ? 16 : 4;
+      MV[i] = [clamp(MV[i][0] + d[0] * st, 12, 388), clamp(MV[i][1] + d[1] * st, 22, 270)];
+      if (!memoTyped) memoTyped = true;
+      memoDraw();
+    });
+  });
+  $('m-reset').addEventListener('click', () => {
+    const from = MV.map((p) => p.slice());
+    if (!hasGsap || reduce) { MV = START.map((p) => p.slice()); memoDraw(); return; }
+    const o = { k: 0 };
+    gsap.to(o, { k: 1, duration: 0.6, ease: 'power2.inOut', onUpdate: () => { MV = from.map((p, i) => [p[0] + (START[i][0] - p[0]) * o.k, p[1] + (START[i][1] - p[1]) * o.k]); memoDraw(); } });
+  });
+  memoDraw(false);
+
+  /* =========================================================
+     ACORDEÃO, FORMULÁRIO E AVISOS
+     ========================================================= */
+  const accT = document.querySelectorAll('.acc-trigger');
+  accT.forEach((b) => b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    accT.forEach((x) => { const on = x === b && open; x.setAttribute('aria-expanded', on); $(x.getAttribute('aria-controls')).dataset.state = on ? 'open' : 'closed'; });
+  }));
+
+  const ICON = {
+    success: '<circle cx="12" cy="12" r="10"/><path d="m8 12.5 3 3 5-6"/>',
+    error: '<circle cx="12" cy="12" r="10"/><path d="M12 7.5v5.5M12 16.5h.01"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 11v5.5M12 7.5h.01"/>'
+  };
+  function toast(kind, title, desc) {
+    const li = document.createElement('li');
+    li.className = 'toast';
+    li.style.setProperty('--c', kind === 'success' ? 'var(--ok)' : kind === 'error' ? 'var(--err)' : 'var(--signal)');
+    li.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[kind]}</svg><b></b><button type="button" aria-label="Fechar aviso">×</button><p></p>`;
+    li.querySelector('b').textContent = title; li.querySelector('p').textContent = desc;
+    const close = () => { if (li.classList.contains('out')) return; li.classList.add('out'); setTimeout(() => li.remove(), reduce ? 0 : 250); };
+    li.querySelector('button').addEventListener('click', close);
+    $('toaster').append(li);
+    setTimeout(close, 7000);
+  }
+
+  // contatos vindos do bloco CONTATO
+  (function contacts() {
+    const list = $('contact-list'), items = [];
+    const ic = {
+      wa: '<path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1.2-1.6-2.3-1.1-1 1c-1.2-.5-2.2-1.5-2.7-2.7l1-1L10.6 7.3z"/>',
+      tel: '<path d="M5 3.5h4l1.5 5-2.5 1.5a11 11 0 0 0 5 5l1.5-2.5 5 1.5v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5.5a2 2 0 0 1 2-2z"/>',
+      mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 7 8.5-7"/>',
+      pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+      ig: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".8"/>'
+    };
+    const wa = CONTATO.whatsapp.replace(/\D/g, '');
+    if (wa) items.push(['wa', `https://wa.me/55${wa}`, 'WhatsApp']);
+    if (CONTATO.telefone) items.push(['tel', 'tel:' + CONTATO.telefone.replace(/[^\d+]/g, ''), CONTATO.telefone]);
+    if (CONTATO.email) items.push(['mail', 'mailto:' + CONTATO.email, CONTATO.email]);
+    if (CONTATO.instagram) items.push(['ig', 'https://instagram.com/' + CONTATO.instagram, '@' + CONTATO.instagram]);
+    if (CONTATO.endereco) items.push(['pin', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CONTATO.endereco), CONTATO.endereco]);
+    items.forEach(([k, href, label]) => {
+      const li = document.createElement('li'), a = document.createElement('a');
+      a.href = href; if (/^https/.test(href)) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ic[k]}</svg><span></span>`;
+      a.querySelector('span').textContent = label;
+      li.append(a); list.append(li);
+    });
+    if (CONTATO.telefone || CONTATO.email) $('st-contato').textContent = [CONTATO.telefone, CONTATO.email].filter(Boolean).join(' / ');
+  })();
+
+  $('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, fields = [['f-nome', 'e-nome', 'Escreva o seu nome.'], ['f-tel', 'e-tel', 'Informe um telefone com DDD.'], ['f-serv', 'e-serv', 'Escolha o serviço.']];
+    let first = null;
+    fields.forEach(([id, eid, msg]) => {
+      const inp = $(id); let bad = !inp.value.trim();
+      if (id === 'f-tel' && !bad) bad = inp.value.replace(/\D/g, '').length < 10;
+      inp.setAttribute('aria-invalid', bad); $(eid).textContent = bad ? msg : '';
+      if (bad && !first) first = inp;
+    });
+    if (first) { toast('error', 'Faltam dados no pedido', 'Confira os campos marcados em vermelho.'); first.focus(); return; }
+    const d = Object.fromEntries(new FormData(f));
+    const msg = `Olá! Meu nome é ${d.nome}. Gostaria de um orçamento de ${d.servico.toLowerCase()}${d.local ? ` em ${d.local}` : ''}.${d.mensagem ? `\n${d.mensagem}` : ''}\nTelefone: ${d.telefone}`;
+    const wa = CONTATO.whatsapp.replace(/\D/g, '');
+    if (wa) { window.open(`https://wa.me/55${wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener'); toast('success', 'Pedido pronto no WhatsApp', 'Confira a mensagem e toque em enviar.'); }
+    else if (CONTATO.email) { location.href = `mailto:${CONTATO.email}?subject=${encodeURIComponent('Pedido de orçamento')}&body=${encodeURIComponent(msg)}`; toast('success', 'Pedido pronto no e-mail', 'Confira a mensagem e envie.'); }
+    else { toast('info', 'Pedido montado', 'O contato da empresa ainda não foi configurado neste site, então nada foi enviado.'); return; }
+    f.reset();
+  });
+  ['f-nome', 'f-tel', 'f-serv'].forEach((id) => $(id).addEventListener('input', () => { if ($(id).getAttribute('aria-invalid') === 'true') { $(id).setAttribute('aria-invalid', 'false'); $('e' + id.slice(1)).textContent = ''; } }));
+
+  /* =========================================================
+     TOPO: menu, régua de rolagem, link ativo
+     ========================================================= */
+  const top = $('top'), menuBtn = $('menu-btn'), nav = $('nav');
+  menuBtn.addEventListener('click', () => {
+    const open = menuBtn.getAttribute('aria-expanded') !== 'true';
+    menuBtn.setAttribute('aria-expanded', open); menuBtn.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu'); nav.classList.toggle('open', open);
+  });
+  nav.addEventListener('click', (e) => { if (e.target.closest('a')) { menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.setAttribute('aria-label', 'Abrir menu'); nav.classList.remove('open'); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { menuBtn.click(); menuBtn.focus(); } });
+  const rulerRead = $('ruler-read');
+  let ticking = false;
+  function onScroll() {
+    ticking = false;
+    const max = document.documentElement.scrollHeight - innerHeight, p = max > 0 ? clamp(scrollY / max, 0, 1) : 0;
+    top.style.setProperty('--sp', p.toFixed(4));
+    top.classList.toggle('scrolled', scrollY > 30);
+    rulerRead.textContent = Math.round(p * 100) + ' m';
+  }
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  onScroll();
+  const navLinks = [...nav.querySelectorAll('a:not(.btn)')];
+  const secObs = new IntersectionObserver((ents) => ents.forEach((en) => {
+    if (en.isIntersecting) navLinks.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + en.target.id));
+  }), { rootMargin: '-45% 0px -50% 0px' });
+  ['empresa', 'servicos', 'processo', 'memorial', 'perguntas', 'contato'].forEach((id) => secObs.observe($(id)));
+
+  /* =========================================================
+     ANIMAÇÕES DE ENTRADA E DE ROLAGEM
+     ========================================================= */
+  const h1 = $('hero-title');
+  if (hasGsap && !reduce) {
+    const words = h1.textContent.trim().split(/\s+/);
+    h1.setAttribute('aria-label', h1.textContent.trim());
+    h1.innerHTML = words.map((w) => `<span class="w" aria-hidden="true"><span>${w}</span></span>`).join(' ');
+  }
+
+  function heroIn() {
+    if (!hasGsap || reduce) { reveal = 1; blitMap(); return; }
+    const r = { v: 0 };
+    gsap.timeline({ defaults: { ease: 'power3.out' } })
+      .to(r, { v: 1, duration: 1.8, ease: 'power2.inOut', onUpdate: () => { reveal = r.v; blitMap(); } }, 0)
+      .from('#hero-title .w > span', { yPercent: 110, duration: 0.9, stagger: 0.06 }, 0.1)
+      .from('.hero .lede, .hero .actions', { y: 18, opacity: 0, duration: 0.7, stagger: 0.1 }, 0.55)
+      .from('#readout', { x: 40, opacity: 0, duration: 0.7 }, 1.1)
+      .from('.top-in > *', { y: -16, opacity: 0, duration: 0.6, stagger: 0.08 }, 0);
+  }
+
+  function runIntro() {
+    const intro = $('intro'), root = document.documentElement;
+    if (!root.classList.contains('intro-on') || !hasGsap) { root.classList.remove('intro-on'); intro.remove(); return false; }
+    try { sessionStorage.setItem('apoio-intro', '1'); } catch (e) {}
+    const box = intro.querySelector('.intro-logo'), img = intro.querySelector('.intro-img');
+    const tl = gsap.timeline({ onComplete: () => { intro.remove(); root.classList.remove('intro-on'); } });
+    tl.fromTo(box, { rotation: -14, scale: 0.9 }, { rotation: 0, scale: 1, duration: 1.4, ease: 'power3.out' }, 0)
+      .to(img, { clipPath: 'circle(38.5% at 49.4% 44.2%)', duration: 0.6, ease: 'power2.out' }, 0.05)
+      .to(img, { clipPath: 'circle(76% at 49.4% 44.2%)', duration: 0.7, ease: 'power2.inOut' }, 0.6)
+      .to(box, { scale: 0.94, opacity: 0, duration: 0.45, ease: 'power2.in' }, 1.75)
+      .to(intro, { clipPath: 'inset(0 0 100% 0)', duration: 0.7, ease: 'expo.inOut' }, 1.85)
+      .add(heroIn, 1.95);
+    const skip = () => { if (tl.isActive()) tl.progress(1); };
+    intro.addEventListener('click', skip, { once: true });
+    addEventListener('keydown', skip, { once: true });
+    return true;
+  }
+
+  /* Laço do mapa */
+  new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; }, { threshold: 0 }).observe(hero);
+  function loop(now) { if (heroVisible && !document.hidden) drawOverlay(now); requestAnimationFrame(loop); }
+
+  renderMap();
+  if (reduce) { reveal = 1; blitMap(); newShot(performance.now() - 2000); drawOverlay(performance.now()); readAt(shots[0].x, shots[0].y, 'Último ponto medido'); }
+  else requestAnimationFrame(loop);
+
+  if (!runIntro()) heroIn();
+
+  let rz = 0, lastW = innerWidth;
+  addEventListener('resize', () => {
+    clearTimeout(rz);
+    rz = setTimeout(() => {
+      if (Math.abs(innerWidth - lastW) < 2 && isMobile()) return; // barra do navegador no celular
+      lastW = innerWidth; renderMap(); if (cmpDrawn) renderCompare();
+      if (reduce) drawOverlay(performance.now());
+    }, 200);
+  });
+
+  /* ScrollTrigger */
+  if (hasST && !reduce) {
+    gsap.to('#map', { yPercent: 12, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+    ScrollTrigger.create({ trigger: '#servicos .svc', start: 'top 72%', once: true, onEnter: () => { svcSeen = true; const t = tabs.find((x) => x.getAttribute('aria-selected') === 'true'); playIll(t.dataset.ill); } });
+    ScrollTrigger.create({
+      trigger: '#years-ruler', start: 'top 92%', end: 'top 45%', scrub: 0.6,
+      onUpdate: (self) => $('years-ruler').style.setProperty('--yp', self.progress.toFixed(4))
+    });
+    ScrollTrigger.create({
+      trigger: '#empresa', start: 'top 75%', once: true,
+      onEnter: () => { const o = { v: 0 }, n = $('yrs-num'); gsap.to(o, { v: YRS, duration: 1.8, ease: 'power2.out', onUpdate: () => { n.textContent = Math.round(o.v); } }); }
+    });
+    gsap.from('#svc-tabs [role="tab"]', { x: -16, opacity: 0, duration: 0.5, stagger: 0.06, ease: 'power2.out', scrollTrigger: { trigger: '#svc-tabs', start: 'top 85%', once: true } });
+
+    const pipe = $('pipe'), steps = pipe.querySelectorAll('li');
+    ScrollTrigger.create({
+      trigger: pipe, start: 'top 70%', end: 'bottom 55%', scrub: 0.6,
+      onUpdate: (self) => {
+        const p = self.progress;
+        pipe.style.setProperty('--p', p.toFixed(4));
+        steps.forEach((li, i) => li.classList.toggle('on', p >= i / (steps.length - 1) - 0.02));
+      }
+    });
+    ScrollTrigger.create({ trigger: cmp, start: 'top 95%', once: true, onEnter: () => { if (!cmpDrawn) renderCompare(); } });
+    ScrollTrigger.create({ trigger: cmp, start: 'top 65%', once: true, onEnter: sweep });
+    ScrollTrigger.create({ trigger: '#specs', start: 'top 90%', once: true, onEnter: () => { if (!cmpDrawn) renderCompare(); countSpecs(); } });
+    ScrollTrigger.create({ trigger: '#memorial .memo-grid', start: 'top 70%', once: true, onEnter: () => { if (!memoTyped) typeMemo(); } });
+    gsap.from('#memo-vtx .vtx', { scale: 0, transformOrigin: 'center', duration: 0.5, stagger: 0.1, ease: 'back.out(3)', scrollTrigger: { trigger: '#memo-svg', start: 'top 80%', once: true } });
+    gsap.from('#faq .acc-item', { x: -16, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power2.out', scrollTrigger: { trigger: '#faq', start: 'top 85%', once: true } });
+    gsap.from('.form', { y: 30, opacity: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: '.form', start: 'top 88%', once: true } });
+    gsap.from('.stamp > div', { opacity: 0, y: 10, duration: 0.5, stagger: 0.06, scrollTrigger: { trigger: '.stamp', start: 'top 95%', once: true } });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
+  } else {
+    svcSeen = true;
+    $('years-ruler').style.setProperty('--yp', 1);
+    playIll('plani');
+    $('pipe').style.setProperty('--p', 1);
+    $('pipe').querySelectorAll('li').forEach((li) => li.classList.add('on'));
+    renderCompare(); countSpecs(); typeMemo();
+  }
+})();
+</script>
+</body>
+</html>
