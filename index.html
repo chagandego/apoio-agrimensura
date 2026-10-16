@@ -93,6 +93,10 @@ p { margin: 0; }
 .btn-ghost { background: transparent; color: var(--ink); }
 .btn-ghost:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
 .btn-sm { min-height: 42px; padding: 0 16px; font-size: .95rem; }
+.btn-wa { background: #25d366; border-color: #25d366; color: #000; }
+.btn-wa:hover { background: #1fb457; border-color: #1fb457; color: #000; }
+.btn-wa svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+@media (min-width: 1081px) and (max-width: 1300px) { .nav .btn-wa .wa-txt { display: none; } .nav .btn-wa { padding: 0 12px; } }
 
 /* ---------- Abertura ---------- */
 .fonts-wait .hero-in, .fonts-wait .readout { visibility: hidden; }
@@ -372,7 +376,7 @@ p { margin: 0; }
 .st-logo img { width: 128px; height: auto; }
 .st-k { display: block; font-size: .74rem; color: var(--ink-3); margin-bottom: 4px; }
 .stamp b { font-variation-settings: 'wdth' 110; }
-.stamp a { font-weight: 650; }
+.stamp a { font-weight: 650; overflow-wrap: anywhere; }
 .copy { margin-top: 18px; font-size: .85rem; color: var(--ink-3); }
 
 /* ---------- Avisos (toast) ---------- */
@@ -480,6 +484,7 @@ p { margin: 0; }
       <a href="#memorial">Memorial</a>
       <a href="#perguntas">Perguntas</a>
       <a class="btn btn-sm" href="#contato">Pedir orçamento</a>
+      <a class="btn btn-sm btn-wa" href="https://wa.me/5511940022094?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20um%20or%C3%A7amento." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1.2-1.6-2.3-1.1-1 1c-1.2-.5-2.2-1.5-2.7-2.7l1-1L10.6 7.3z"/></svg><span class="wa-txt">WhatsApp</span></a>
     </nav>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menu"><span></span></button>
   </div>
@@ -496,6 +501,7 @@ p { margin: 0; }
       <p class="lede">Levantamento planialtimétrico e cadastral, aerolevantamento com drone, batimetria, laser scanner, delimitação de terrenos e usucapião. Medimos em campo e entregamos planta, memorial e arquivos prontos para prefeitura, cartório ou projeto.</p>
       <div class="actions">
         <a class="btn" href="#contato">Pedir orçamento</a>
+        <a class="btn btn-wa" href="https://wa.me/5511940022094?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20um%20or%C3%A7amento." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1.2-1.6-2.3-1.1-1 1c-1.2-.5-2.2-1.5-2.7-2.7l1-1L10.6 7.3z"/></svg>Chamar no WhatsApp</a>
         <a class="btn btn-ghost" href="#servicos">Ver os serviços</a>
       </div>
     </div>
@@ -1108,10 +1114,10 @@ p { margin: 0; }
      (lista de contatos, carimbo do rodapé e destino do formulário)
      ========================================================= */
   const CONTATO = {
-    whatsapp: '',   // só números com DDD, ex.: '11987654321'
-    telefone: '',   // como deve aparecer, ex.: '(11) 3456-7890'
-    email: '',      // ex.: 'contato@apoioagrimensura.com.br'
-    endereco: '',   // ex.: 'Rua Exemplo, 123, Centro, Cidade - SP'
+    whatsapp: '11940022094',   // só números com DDD
+    telefone: '(11) 94002-2094',   // como deve aparecer
+    email: 'ernando_adm@apoiotopografia.com.br',
+    endereco: 'Rua Heloísa Pamplona, 41, Fundação, São Caetano do Sul - SP, 09520-320',
     instagram: ''   // só o usuário, sem @
   };
 
@@ -1883,7 +1889,11 @@ p { margin: 0; }
       a.querySelector('span').textContent = label;
       li.append(a); list.append(li);
     });
-    if (CONTATO.telefone || CONTATO.email) $('st-contato').textContent = [CONTATO.telefone, CONTATO.email].filter(Boolean).join(' / ');
+    if (CONTATO.telefone || CONTATO.email) {
+      const st = $('st-contato'); st.textContent = '';
+      if (CONTATO.telefone) { const a = document.createElement('a'); a.href = wa ? `https://wa.me/55${wa}` : 'tel:' + CONTATO.telefone.replace(/[^\d+]/g, ''); if (wa) { a.target = '_blank'; a.rel = 'noopener'; } a.textContent = CONTATO.telefone; st.append(a); }
+      if (CONTATO.email) { const a = document.createElement('a'); a.href = 'mailto:' + CONTATO.email; a.textContent = CONTATO.email; st.append(document.createElement('br'), a); }
+    }
   })();
 
   $('form').addEventListener('submit', (e) => {
