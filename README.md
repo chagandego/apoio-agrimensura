@@ -11,7 +11,8 @@ Página única em HTML (`index.html`), sem etapa de build e sem servidor própri
 - `fonts/`: Archivo (SIL Open Font License), servida pelo próprio site
 
 - **Contatos:** preencha o bloco `CONTATO` no começo do script do `index.html` (WhatsApp, telefone, e-mail, endereço, Instagram). A lista de contatos, o rodapé e o formulário se ajustam sozinhos.
-- **Google:** o `vercel.json` manda o cabeçalho `X-Robots-Tag: noindex`. Para liberar nas buscas, apague o bloco `headers`.
+- **Endereço:** https://www.apoiotopografia.tec.br (domínio no Registro.br; a raiz sem www redireciona para o www).
+- **Google:** liberado desde 19/10/2026 (sem `X-Robots-Tag`), com `robots.txt`, `sitemap.xml` e link canônico apontando para o domínio próprio.
 
 ## Segurança
 
